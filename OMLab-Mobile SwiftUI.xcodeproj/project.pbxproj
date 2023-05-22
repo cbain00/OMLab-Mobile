@@ -1,0 +1,434 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F639335629F18FD500ABE530 /* Preview Content in Resources */ = {isa = PBXBuildFile; fileRef = F639335529F18FD500ABE530 /* Preview Content */; };
+		F63B700729E8A54700CF3BB2 /* OMLM_SwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B700629E8A54700CF3BB2 /* OMLM_SwiftUIApp.swift */; };
+		F63B700929E8A54700CF3BB2 /* OMLM_View.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B700829E8A54700CF3BB2 /* OMLM_View.swift */; };
+		F63B700B29E8A54900CF3BB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F63B700A29E8A54900CF3BB2 /* Assets.xcassets */; };
+		F63B701529EDEC0100CF3BB2 /* OMLM_ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B701429EDEC0100CF3BB2 /* OMLM_ViewModel.swift */; };
+		F63B701729EDEE2900CF3BB2 /* OMLM_Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B701629EDEE2900CF3BB2 /* OMLM_Model.swift */; };
+		F63B701929EE03CA00CF3BB2 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B701829EE03CA00CF3BB2 /* HomeView.swift */; };
+		F63B701B29EE041400CF3BB2 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B701A29EE041400CF3BB2 /* ProfileView.swift */; };
+		F63B701D29EF058100CF3BB2 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B701C29EF058100CF3BB2 /* CameraView.swift */; };
+		F63B701F29EF46B600CF3BB2 /* FileViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B701E29EF46B600CF3BB2 /* FileViews.swift */; };
+		F63B702229F04EF000CF3BB2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B702129F04EF000CF3BB2 /* SettingsView.swift */; };
+		F63B702A29F0694B00CF3BB2 /* EyeTrackingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B702929F0694B00CF3BB2 /* EyeTrackingViewController.swift */; };
+		F63B702C29F0698C00CF3BB2 /* EyeTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B702B29F0698C00CF3BB2 /* EyeTrackingService.swift */; };
+		F63B702E29F0699A00CF3BB2 /* EyeTrackingRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B702D29F0699A00CF3BB2 /* EyeTrackingRecording.swift */; };
+		F63B703129F06AC300CF3BB2 /* VirtualContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B703029F06AC300CF3BB2 /* VirtualContent.swift */; };
+		F63B703329F06AD100CF3BB2 /* TransformVisualization.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B703229F06AD100CF3BB2 /* TransformVisualization.swift */; };
+		F63B703D29F06BB500CF3BB2 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B703C29F06BB500CF3BB2 /* Utilities.swift */; };
+		F6888A0629FC2A5D00E97F7D /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = F6888A0529FC2A5D00E97F7D /* Models.scnassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F639335529F18FD500ABE530 /* Preview Content */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Preview Content"; sourceTree = "<group>"; };
+		F63B700329E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OMLab-Mobile-SwiftUI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F63B700629E8A54700CF3BB2 /* OMLM_SwiftUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OMLM_SwiftUIApp.swift; sourceTree = "<group>"; };
+		F63B700829E8A54700CF3BB2 /* OMLM_View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OMLM_View.swift; sourceTree = "<group>"; };
+		F63B700A29E8A54900CF3BB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F63B701429EDEC0100CF3BB2 /* OMLM_ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OMLM_ViewModel.swift; sourceTree = "<group>"; };
+		F63B701629EDEE2900CF3BB2 /* OMLM_Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OMLM_Model.swift; sourceTree = "<group>"; };
+		F63B701829EE03CA00CF3BB2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		F63B701A29EE041400CF3BB2 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		F63B701C29EF058100CF3BB2 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		F63B701E29EF46B600CF3BB2 /* FileViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileViews.swift; sourceTree = "<group>"; };
+		F63B702129F04EF000CF3BB2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F63B702929F0694B00CF3BB2 /* EyeTrackingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeTrackingViewController.swift; sourceTree = "<group>"; };
+		F63B702B29F0698C00CF3BB2 /* EyeTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeTrackingService.swift; sourceTree = "<group>"; };
+		F63B702D29F0699A00CF3BB2 /* EyeTrackingRecording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeTrackingRecording.swift; sourceTree = "<group>"; };
+		F63B703029F06AC300CF3BB2 /* VirtualContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualContent.swift; sourceTree = "<group>"; };
+		F63B703229F06AD100CF3BB2 /* TransformVisualization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformVisualization.swift; sourceTree = "<group>"; };
+		F63B703C29F06BB500CF3BB2 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		F6888A0529FC2A5D00E97F7D /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
+		F6888A242A12B28B00E97F7D /* Charts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Charts.framework; path = System/Library/Frameworks/Charts.framework; sourceTree = SDKROOT; };
+		F6B6ABF429F6CFD8005F3180 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F63B700029E8A54700CF3BB2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F63B6FFA29E8A54700CF3BB2 = {
+			isa = PBXGroup;
+			children = (
+				F63B700529E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI */,
+				F63B700429E8A54700CF3BB2 /* Products */,
+				F6888A232A12B28B00E97F7D /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		F63B700429E8A54700CF3BB2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F63B700329E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F63B700529E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI */ = {
+			isa = PBXGroup;
+			children = (
+				F6B6ABF429F6CFD8005F3180 /* Info.plist */,
+				F63B701629EDEE2900CF3BB2 /* OMLM_Model.swift */,
+				F63B701429EDEC0100CF3BB2 /* OMLM_ViewModel.swift */,
+				F63B700629E8A54700CF3BB2 /* OMLM_SwiftUIApp.swift */,
+				F63B700829E8A54700CF3BB2 /* OMLM_View.swift */,
+				F63B701A29EE041400CF3BB2 /* ProfileView.swift */,
+				F63B702129F04EF000CF3BB2 /* SettingsView.swift */,
+				F63B701829EE03CA00CF3BB2 /* HomeView.swift */,
+				F63B701C29EF058100CF3BB2 /* CameraView.swift */,
+				F63B701E29EF46B600CF3BB2 /* FileViews.swift */,
+				F63B702F29F06AA100CF3BB2 /* Face Overlay Content */,
+				F63B702729F0681B00CF3BB2 /* Eye Tracking */,
+				F63B700A29E8A54900CF3BB2 /* Assets.xcassets */,
+				F639335529F18FD500ABE530 /* Preview Content */,
+				F6888A0429FC2A4900E97F7D /* Resources */,
+			);
+			path = "OMLab-Mobile-SwiftUI";
+			sourceTree = "<group>";
+		};
+		F63B702729F0681B00CF3BB2 /* Eye Tracking */ = {
+			isa = PBXGroup;
+			children = (
+				F63B702929F0694B00CF3BB2 /* EyeTrackingViewController.swift */,
+				F63B702B29F0698C00CF3BB2 /* EyeTrackingService.swift */,
+				F63B702D29F0699A00CF3BB2 /* EyeTrackingRecording.swift */,
+			);
+			path = "Eye Tracking";
+			sourceTree = "<group>";
+		};
+		F63B702F29F06AA100CF3BB2 /* Face Overlay Content */ = {
+			isa = PBXGroup;
+			children = (
+				F63B703029F06AC300CF3BB2 /* VirtualContent.swift */,
+				F63B703229F06AD100CF3BB2 /* TransformVisualization.swift */,
+			);
+			path = "Face Overlay Content";
+			sourceTree = "<group>";
+		};
+		F6888A0429FC2A4900E97F7D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F63B703C29F06BB500CF3BB2 /* Utilities.swift */,
+				F6888A0529FC2A5D00E97F7D /* Models.scnassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		F6888A232A12B28B00E97F7D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F6888A242A12B28B00E97F7D /* Charts.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F63B700229E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F63B701129E8A54900CF3BB2 /* Build configuration list for PBXNativeTarget "OMLab-Mobile-SwiftUI" */;
+			buildPhases = (
+				F63B6FFF29E8A54700CF3BB2 /* Sources */,
+				F63B700029E8A54700CF3BB2 /* Frameworks */,
+				F63B700129E8A54700CF3BB2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "OMLab-Mobile-SwiftUI";
+			productName = "OMLab-Mobile SwiftUI";
+			productReference = F63B700329E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F63B6FFB29E8A54700CF3BB2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					F63B700229E8A54700CF3BB2 = {
+						CreatedOnToolsVersion = 14.2;
+					};
+				};
+			};
+			buildConfigurationList = F63B6FFE29E8A54700CF3BB2 /* Build configuration list for PBXProject "OMLab-Mobile SwiftUI" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F63B6FFA29E8A54700CF3BB2;
+			productRefGroup = F63B700429E8A54700CF3BB2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F63B700229E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F63B700129E8A54700CF3BB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F639335629F18FD500ABE530 /* Preview Content in Resources */,
+				F6888A0629FC2A5D00E97F7D /* Models.scnassets in Resources */,
+				F63B700B29E8A54900CF3BB2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F63B6FFF29E8A54700CF3BB2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F63B702E29F0699A00CF3BB2 /* EyeTrackingRecording.swift in Sources */,
+				F63B703329F06AD100CF3BB2 /* TransformVisualization.swift in Sources */,
+				F63B701F29EF46B600CF3BB2 /* FileViews.swift in Sources */,
+				F63B703129F06AC300CF3BB2 /* VirtualContent.swift in Sources */,
+				F63B701929EE03CA00CF3BB2 /* HomeView.swift in Sources */,
+				F63B701D29EF058100CF3BB2 /* CameraView.swift in Sources */,
+				F63B702A29F0694B00CF3BB2 /* EyeTrackingViewController.swift in Sources */,
+				F63B702229F04EF000CF3BB2 /* SettingsView.swift in Sources */,
+				F63B700929E8A54700CF3BB2 /* OMLM_View.swift in Sources */,
+				F63B701729EDEE2900CF3BB2 /* OMLM_Model.swift in Sources */,
+				F63B703D29F06BB500CF3BB2 /* Utilities.swift in Sources */,
+				F63B701529EDEC0100CF3BB2 /* OMLM_ViewModel.swift in Sources */,
+				F63B701B29EE041400CF3BB2 /* ProfileView.swift in Sources */,
+				F63B702C29F0698C00CF3BB2 /* EyeTrackingService.swift in Sources */,
+				F63B700729E8A54700CF3BB2 /* OMLM_SwiftUIApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F63B700F29E8A54900CF3BB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F63B701029E8A54900CF3BB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F63B701229E8A54900CF3BB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"OMLab-Mobile-SwiftUI/Preview Content\"";
+				DEVELOPMENT_TEAM = 6JLPKL9375;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "OMLab-Mobile-SwiftUI/Info.plist";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "\"\"";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.personal.OMLab-Mobile-SwiftUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F63B701329E8A54900CF3BB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"OMLab-Mobile-SwiftUI/Preview Content\"";
+				DEVELOPMENT_TEAM = 6JLPKL9375;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "OMLab-Mobile-SwiftUI/Info.plist";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "\"\"";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.personal.OMLab-Mobile-SwiftUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F63B6FFE29E8A54700CF3BB2 /* Build configuration list for PBXProject "OMLab-Mobile SwiftUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F63B700F29E8A54900CF3BB2 /* Debug */,
+				F63B701029E8A54900CF3BB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F63B701129E8A54900CF3BB2 /* Build configuration list for PBXNativeTarget "OMLab-Mobile-SwiftUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F63B701229E8A54900CF3BB2 /* Debug */,
+				F63B701329E8A54900CF3BB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F63B6FFB29E8A54700CF3BB2 /* Project object */;
+}

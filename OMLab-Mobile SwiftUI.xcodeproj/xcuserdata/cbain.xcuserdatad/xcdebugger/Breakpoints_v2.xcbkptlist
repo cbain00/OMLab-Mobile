@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "10B75489-525A-408B-8FB0-D87744B5A167"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "01F6B397-5391-4E39-933E-34F28BD3CDDB"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "OMLab-Mobile-SwiftUI/OMLM_ViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "126"
+            endingLineNumber = "126"
+            landmarkName = "getFileFolderSize(fileFolderURL:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "01F6B397-5391-4E39-933E-34F28BD3CDDB - 20f599c9e4870f4f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "OMLab_Mobile_SwiftUI.HomeView_ViewModel.getFileFolderSize(fileFolderURL: Foundation.URL) -&gt; Swift.Int64"
+                  moduleName = "OMLab-Mobile-SwiftUI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/OMLM_ViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "125"
+                  endingLineNumber = "125"
+                  offsetFromSymbolStart = "276">
+               </Location>
+               <Location
+                  uuid = "01F6B397-5391-4E39-933E-34F28BD3CDDB - 20f599c9e4870f4f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "OMLab_Mobile_SwiftUI.HomeView_ViewModel.getFileFolderSize(fileFolderURL: Foundation.URL) -&gt; Swift.Int64"
+                  moduleName = "OMLab-Mobile-SwiftUI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/OMLM_ViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "125"
+                  endingLineNumber = "125"
+                  offsetFromSymbolStart = "308">
+               </Location>
+               <Location
+                  uuid = "01F6B397-5391-4E39-933E-34F28BD3CDDB - b6b5c54d376a759e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "OMLab_Mobile_SwiftUI.HomeView_ViewModel.getFileFolderSize(fileFolderURL: Foundation.URL) -&gt; Swift.Double"
+                  moduleName = "OMLab-Mobile-SwiftUI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/OMLM_ViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "124"
+                  endingLineNumber = "124"
+                  offsetFromSymbolStart = "276">
+               </Location>
+               <Location
+                  uuid = "01F6B397-5391-4E39-933E-34F28BD3CDDB - b6b5c54d376a75bf"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "OMLab_Mobile_SwiftUI.HomeView_ViewModel.getFileFolderSize(fileFolderURL: Foundation.URL) -&gt; Swift.Double"
+                  moduleName = "OMLab-Mobile-SwiftUI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/OMLM_ViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "125"
+                  endingLineNumber = "125"
+                  offsetFromSymbolStart = "176">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
