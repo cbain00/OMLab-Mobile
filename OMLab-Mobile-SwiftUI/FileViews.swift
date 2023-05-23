@@ -97,13 +97,13 @@ struct FileDetailView: View {
     func renameFile(fileName: String, newFileName: String) {
         let fileManager = FileManager.default
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = documentsURL.appendingPathComponent(fileName)
+        var fileURL = documentsURL.appendingPathComponent(fileName)
         let newFileURL = documentsURL.appendingPathComponent(newFileName)
         
         do {
-            try fileManager.moveItem(at: fileURL, to: newFileURL)
-            // Update the view or perform any other necessary operations
-            
+            var rv = URLResourceValues()
+            rv.name = newFileName
+            try fileURL.setResourceValues(rv)
         } catch {
             print("Error renaming file: \(error.localizedDescription)")
         }
@@ -121,7 +121,7 @@ struct GraphView: View {
             let eyeData = makeDataArray(csv: csv, yvalue: "RightEyeX")
             let xMin = eyeData.map { $0.x }.min() ?? 0; let xMax = eyeData.map { $0.x }.max() ?? 0
             let yMin = eyeData.map { $0.y }.min() ?? 0; let yMax = eyeData.map { $0.y }.max() ?? 0
-                    
+            
             Chart {
                 ForEach(eyeData, id: \.id) { item in
                     LineMark(
@@ -134,7 +134,7 @@ struct GraphView: View {
             }
             .chartXScale(domain: [xMin, xMax])
             .chartYScale(domain: [yMin, yMax])
-
+            
         } else {
             Text("No Graph Available")
                 .font(.title3)
@@ -147,131 +147,73 @@ struct GraphView: View {
         var x: Double
         var y: Double
     }
-        
+    
     // https://medium.com/@deadbeef404/reading-a-csv-in-swift-7be7a20220c6
     // .contentsOfDirectory acts as a "double-click" on a folder
     func getCSVData(fileName: String) -> [String: [String]] {
         let fileManager = FileManager.default
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        
-        do {
-            let fileURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            
-            // Find the specified file folder
-            if let fileFolderURL = fileURLs.first(where: { $0.lastPathComponent == fileName }) {
-                let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-                
-                // Assuming the CSV file is the first file in the folder
-                if let csvFileURL = filesURL.first {
-                    let content = try String(contentsOf: csvFileURL)
-                    let lines = content.components(separatedBy: "\n")
-                    var parsedCSV: [String: [String]] = [:]
-                    
-                    // Extract header line and split it into column names
-                    let headerLine = lines[0]
-                    let columnNames = headerLine.components(separatedBy: ", ")
-                    
-                    // Initialize arrays for each column name
-                    for columnName in columnNames {
-                        parsedCSV[columnName] = []
-                    }
-                    
-                    // Process data lines
-                    for line in lines.dropFirst() {
-                        let values = line.components(separatedBy: ", ")
-                        
-                        // Append values to corresponding column arrays
-                        for (index, columnName) in columnNames.enumerated() {
-                            if index < values.count && values[index] != "" { parsedCSV[columnName]?.append(values[index]) }
-                        }
-                    }
-
-                    return parsedCSV
-                    
-                } else {
-                    print("No CSV file found in the specified folder.")
-                }
-            } else {
-                print("Specified file folder not found.")
-            }
-        } catch {
-            print("Error while accessing file directory: \(error.localizedDescription)")
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("Failed to access documents directory.")
+            return [:]
         }
         
-        return [:]
+        let fileFolderURL = documentsURL.appendingPathComponent(fileName)
+        do {
+            let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            
+            guard let csvFileURL = filesURL.first else {
+                print("No CSV file found in the specified folder.")
+                return [:]
+            }
+            
+            let content = try String(contentsOf: csvFileURL)
+            let lines = content.components(separatedBy: "\n")
+            
+            guard !lines.isEmpty else {
+                print("CSV file is empty.")
+                return [:]
+            }
+            
+            let headerLine = lines[0]
+            let columnNames = headerLine.components(separatedBy: ", ")
+            
+            var parsedCSV: [String: [String]] = [:]
+            for columnName in columnNames {
+                parsedCSV[columnName] = []
+            }
+            
+            for line in lines.dropFirst() {
+                let values = line.components(separatedBy: ", ")
+                
+                for (index, columnName) in columnNames.enumerated() {
+                    if index < values.count && !values[index].isEmpty {
+                        parsedCSV[columnName]?.append(values[index])
+                    }
+                }
+            }
+            
+            return parsedCSV
+        } catch {
+            print("Error while accessing file directory: \(error.localizedDescription)")
+            return [:]
+        }
     }
-
+    
     func makeDataArray(csv: [String: [String]], yvalue: String) -> [GraphData] {
+        guard let xValues = csv["Time"], let yValues = csv[yvalue] else {
+            return []
+        }
+        
+        let count = min(xValues.count, yValues.count)
         var dataArray: [GraphData] = []
         
-        if let xValues = csv["Time"], let yValues = csv[yvalue] {
-            let count = min(xValues.count, yValues.count)
-            
-            for i in 0..<count {
-                if let x = Double(xValues[i]), let y = Double(yValues[i]) {
-                    let graphData = GraphData(x: x, y: y)
-                    dataArray.append(graphData)
-                }
+        for i in 0..<count {
+            if let x = Double(xValues[i]), let y = Double(yValues[i]) {
+                let graphData = GraphData(x: x, y: y)
+                dataArray.append(graphData)
             }
         }
         
         return dataArray
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-// Test to make graph view
-/*
-struct ProfitOverTime {
-    var date: Int
-    var profit: Double
-}
-
-struct GraphView: View {
-    // Fake data for demonstration purposes
-    let departmentAProfit: [ProfitOverTime] = [
-        .init(date: 1, profit: 20.0),
-        .init(date: 2, profit: 30.0),
-        .init(date: 3, profit: 40.0),
-    ]
-    let departmentBProfit: [ProfitOverTime] = [
-        .init(date: 1, profit: 50.0),
-        .init(date: 2, profit: 45.0),
-        .init(date: 3, profit: 40.0),
-    ]
-
-    var body: some View {
-        Chart {
-            ForEach(departmentAProfit, id: \.date) { item in
-                LineMark(
-                    x: .value("Date", item.date),
-                    y: .value("Profit A", item.profit),
-                    series: .value("Company", "A")
-                )
-                .foregroundStyle(.blue)
-            }
-            ForEach(departmentBProfit, id: \.date) { item in
-                LineMark(
-                    x: .value("Date", item.date),
-                    y: .value("Profit B", item.profit),
-                    series: .value("Company", "B")
-                )
-                .foregroundStyle(.green)
-            }
-            RuleMark(
-                y: .value("Threshold", 400)
-            )
-            .foregroundStyle(.red)
-        }
-    }
-}
-*/
