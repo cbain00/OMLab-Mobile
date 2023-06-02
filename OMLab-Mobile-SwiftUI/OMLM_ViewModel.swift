@@ -122,17 +122,39 @@ class HomeView_ViewModel: ObservableObject {
         return nil
     }
 
-    // function not exactly working right now (always returns 0) might be bc only 1 txt file in it and returning int64 type...
+    // returns size of contents of folder in KB
     func getFileFolderSize(fileFolderURL: URL) -> Int64 {
+        let fileManager = FileManager.default
+        var totalSize: Int64 = 0
+        
         do {
-            let resourceValues = try fileFolderURL.resourceValues(forKeys: [.totalFileAllocatedSizeKey])
-            if let folderSize = resourceValues.totalFileAllocatedSize {
-                return Int64(folderSize)
+            let files = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: [.totalFileAllocatedSizeKey], options: .skipsHiddenFiles)
+            
+            for file in files {
+                let resourceValues = try file.resourceValues(forKeys: [.totalFileAllocatedSizeKey])
+                if let fileSize = resourceValues.totalFileAllocatedSize {
+                    totalSize += Int64(fileSize)
+                }
             }
         } catch {
             print("Error retrieving folder size: \(error.localizedDescription)")
         }
         
-        return 0
+        totalSize /= 1000
+        return totalSize
+    }
+
+    func deleteFile(_ file: String) {
+        // Perform the deletion logic here
+        let fileManager = FileManager.default
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileURL = documentsURL.appendingPathComponent(file)
+        
+        do {
+            try fileManager.removeItem(at: fileURL)
+        } catch {
+            print("Error deleting file: \(error.localizedDescription)")
+        }
+        print("\(file) deleted successfully.")
     }
 }

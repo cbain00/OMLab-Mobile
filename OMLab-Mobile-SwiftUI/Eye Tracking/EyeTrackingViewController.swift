@@ -2,7 +2,7 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-Main view controller for the AR experience.
+Main view controller for eye tracking experience.
 */
 
 import ARKit
@@ -10,13 +10,14 @@ import SceneKit
 import SwiftUI
 import UIKit
 
-class EyeTrackingViewController: UIViewController, ARSessionDelegate {
+class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFieldDelegate {
     
     // MARK: Outlets
     var sceneView: ARSCNView!
     weak var recordingSwitch: UISwitch!
     weak var recordingName: UITextField!
     //weak var logTextView: UITextView!
+    var isRecordingSwitchOn = false
 
     // https://stackoverflow.com/questions/35006738/auto-scroll-for-uitextview-using-swift-ios-app
     // MARK: Properties
@@ -32,6 +33,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate {
         
         let sceneView = ARSCNView(frame: view.bounds)
         sceneView.translatesAutoresizingMaskIntoConstraints = false // disable auto layout
+        
         view.addSubview(sceneView)
         
         NSLayoutConstraint.activate([
@@ -43,6 +45,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate {
         
         let recordingSwitch = UISwitch()
         recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
+        
         view.addSubview(recordingSwitch)
         
         NSLayoutConstraint.activate([
@@ -50,23 +53,28 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate {
             recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
         ])
         
+        /*
         let recordingName = UITextField()
         recordingName.translatesAutoresizingMaskIntoConstraints = false
         recordingName.placeholder = "Enter recording name"
         recordingName.borderStyle = .roundedRect
-        view.addSubview(recordingName)
+        recordingName.returnKeyType = .done
+        recordingName.delegate = self
 
+        view.addSubview(recordingName)
+        
         NSLayoutConstraint.activate([
             recordingName.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             recordingName.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             recordingName.widthAnchor.constraint(equalToConstant: 200),
             recordingName.heightAnchor.constraint(equalToConstant: 30)
         ])
+         */
 
         // asign values to existing variables
         self.sceneView = sceneView
         self.recordingSwitch = recordingSwitch
-        self.recordingName = recordingName
+        //self.recordingName = recordingName
 
         sceneView.delegate = self
         sceneView.session.delegate = self
@@ -79,6 +87,11 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate {
         eyeTrackingNetworkService = EyeTrackingNetworkService(on:8000, self)
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // Dismiss the keyboard
+        return true
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -89,9 +102,10 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate {
         // "Reset" to run the AR session for the first time.
         resetTracking()
     }
-
+    
     // MARK: - ARSessionDelegate
 
+    // Session display if AR session fails to display
     func session(_ session: ARSession, didFailWithError error: Error) {
         guard error is ARError else { return }
         
@@ -108,9 +122,59 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate {
         }
     }
     
+    // Running AR Session
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
-        let faceAnchor = anchors[0] as! ARFaceAnchor;
-        eyeTrackingRecording.RecordData(recordingSwitchIsOn: recordingSwitch.isOn, session, faceAnchor, recordingName.text ?? "test")
+        let faceAnchor = anchors[0] as! ARFaceAnchor
+        eyeTrackingRecording.RecordData(recordingSwitchIsOn: recordingSwitch.isOn, session, faceAnchor, "test")
+        //self.displayFileNamer()
+    }
+
+    func displayFileNamer() {
+        if isRecordingSwitchOn == recordingSwitch.isOn {
+            // Recording switch state hasn't changed, so return
+            return
+        }
+        
+        isRecordingSwitchOn = recordingSwitch.isOn
+
+        let alertController = UIAlertController(title: "File Name", message: "Enter a name for the recording", preferredStyle: .alert)
+
+        alertController.addTextField { textField in
+            textField.placeholder = "Enter Recording Name"
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            self.resetTracking()
+        }
+
+        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+            guard let fileName = alertController.textFields?.first?.text else {
+                self.resetTracking()
+                return
+            }
+
+            self.renameFile(fileName: self.eyeTrackingRecording.folderName, newFileName: fileName)
+            self.resetTracking()
+        }
+
+        alertController.addAction(cancelAction)
+        alertController.addAction(saveAction)
+
+        present(alertController, animated: true, completion: nil)
+    }
+
+    func renameFile(fileName: String, newFileName: String) {
+        let fileManager = FileManager.default
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileURL = documentsURL.appendingPathComponent(fileName)
+        let newFileURL = documentsURL.appendingPathComponent(newFileName)
+        
+        do {
+            try fileManager.moveItem(at: fileURL, to: newFileURL)
+            print("File named successfully.")
+        } catch {
+            print("Error renaming file: \(error.localizedDescription)")
+        }
     }
     
     func recordEvent(_ message: String) {

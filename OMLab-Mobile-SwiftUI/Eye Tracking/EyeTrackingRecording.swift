@@ -15,6 +15,7 @@ class EyeTrackingRecording {
     var eventFile: FileHandle!
     var dataFilePath: String = ""
     var eventFilePath: String = ""
+    var folderName: String = ""
     
     var lastTimestamp : TimeInterval = TimeInterval()
     
@@ -30,7 +31,7 @@ class EyeTrackingRecording {
             {
                 if dataFile == nil
                 {
-                    CreateNewFile(recordingName)
+                    folderName = CreateNewFile(recordingName)
                 }
                 
                 // https://stackoverflow.com/questions/50236214/arkit-eulerangles-of-transform-matrix-4x4
@@ -115,7 +116,7 @@ class EyeTrackingRecording {
     }
     
     
-    func CreateNewFile(_ recordingName: String) {
+    func CreateNewFile(_ recordingName: String) -> String {
         // https://stackoverflow.com/questions/58107752/how-can-i-write-to-a-file-line-by-line-in-swift-4
         // https://nemecek.be/blog/57/making-files-from-your-app-available-in-the-ios-files-app
         // https://cocoacasts.com/swift-fundamentals-how-to-convert-a-date-to-a-string-in-swift
@@ -170,6 +171,7 @@ class EyeTrackingRecording {
         
         // Write data
         dataFile!.write(line.data(using: .utf8)!)
+        return foldername
     }
     
     

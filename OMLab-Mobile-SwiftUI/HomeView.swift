@@ -19,7 +19,7 @@ struct HomeView: View {
                 Divider()
 
                 // view for sorting button
-                SortByView(header: "Test Files", sortOption: $viewModel.sortOption)
+                SortByView(header: "Files", sortOption: $viewModel.sortOption)
 
                 // view for list of saved user files
                 FileListView()
@@ -42,6 +42,7 @@ struct HomeMenuView: View {
                 
             } label: {
                 Image(systemName: "ellipsis")
+                    .frame(width: 25, height: 15, alignment: .trailing)
             }
 
             Text("Home")

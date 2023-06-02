@@ -14,7 +14,7 @@ struct FileFolder: Hashable, Identifiable {
     var size: Int64
 }
 
-struct File: Hashable, Identifiable {
+struct CSVFile: Hashable, Identifiable {
     var id = UUID()
     var name: String
     var timestamp: Date
