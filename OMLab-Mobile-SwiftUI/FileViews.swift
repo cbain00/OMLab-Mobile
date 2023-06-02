@@ -73,37 +73,32 @@ struct FileDetailView: View {
             // display graphs of data based on passed file
             Spacer()
             
-            GraphView(fileName: fileName)
+            GraphView(fileName: fileName, yvalue: "RightEyeX")
             
             Spacer()
+            
+            GraphView(fileName: fileName, yvalue: "RightEyeY")
+            
+            Spacer()
+            
+            GraphView(fileName: fileName, yvalue: "RightEyeZ")
                 
         }
         .onAppear {
             viewModel.addRecentFile(file)
             //print(viewModel.recentFiles)
         }
-        .alert(isPresented: $isAlertPresented) {
-            Alert(
-                title: Text("Rename File"),
-                message: Text("Enter the new file name"),
-                primaryButton: .default(Text("Rename"), action: {
-                    renameFile(fileName: fileName, newFileName: newFileName)
-                }),
-                secondaryButton: .cancel()
-            )
-        }
     }
     
     func renameFile(fileName: String, newFileName: String) {
         let fileManager = FileManager.default
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        var fileURL = documentsURL.appendingPathComponent(fileName)
+        let fileURL = documentsURL.appendingPathComponent(fileName)
         let newFileURL = documentsURL.appendingPathComponent(newFileName)
         
         do {
-            var rv = URLResourceValues()
-            rv.name = newFileName
-            try fileURL.setResourceValues(rv)
+            try fileManager.moveItem(at: fileURL, to: newFileURL)
+            print("File renamed successfully.")
         } catch {
             print("Error renaming file: \(error.localizedDescription)")
         }
@@ -113,12 +108,13 @@ struct FileDetailView: View {
 
 struct GraphView: View {
     var fileName: String
+    let yvalue: String
     
     var body: some View {
         let csv = getCSVData(fileName: fileName)
         if !csv.isEmpty {
             // currently using right eye tracking data, in future this will either have multiple views or the user can pick what will be on y-axis
-            let eyeData = makeDataArray(csv: csv, yvalue: "RightEyeX")
+            let eyeData = makeDataArray(csv: csv, yvalue: yvalue)
             let xMin = eyeData.map { $0.x }.min() ?? 0; let xMax = eyeData.map { $0.x }.max() ?? 0
             let yMin = eyeData.map { $0.y }.min() ?? 0; let yMax = eyeData.map { $0.y }.max() ?? 0
             
