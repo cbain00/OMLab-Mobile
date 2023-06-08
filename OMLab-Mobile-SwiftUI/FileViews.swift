@@ -88,17 +88,6 @@ struct FileDetailView: View {
             }
             .padding(.horizontal)
             
-<<<<<<< HEAD
-            GraphView(fileName: fileName, yvalue: "RightEyeX")
-
-            Spacer()
-
-            GraphView(fileName: fileName, yvalue: "RightEyeY")
-
-            Spacer()
-
-            GraphView(fileName: fileName, yvalue: "RightEyeZ")
-=======
             // display graphs of data based on passed y-axis param
             ScrollView {
                 // right eye positions
@@ -111,14 +100,10 @@ struct FileDetailView: View {
                 GraphView(fileName: fileName, yvalue: "HeadY", color: .blue)
                 GraphView(fileName: fileName, yvalue: "HeadZ", color: .green)
             }
->>>>>>> 6c400ff (making UI better)
         }
         .onAppear {
             viewModel.addRecentFile(file)
         }
-<<<<<<< HEAD
-=======
-        
         .sheet(isPresented: $showRenameView) {
             RenameFileView(fileName: fileName, newFileName: $newFileName) { newName in
                 renameFile(fileName: fileName, newFileName: newName)
@@ -129,7 +114,6 @@ struct FileDetailView: View {
         .sheet(isPresented: $showFileInfoView) {
             FileInfoView(file: file)
         }
->>>>>>> 6c400ff (making UI better)
     }
     
     struct RenameFileView: View {
@@ -285,10 +269,7 @@ struct FileDetailView: View {
 struct GraphView: View {
     var fileName: String
     let yvalue: String
-<<<<<<< HEAD
-=======
     let color: Color
->>>>>>> 6c400ff (making UI better)
     
     var body: some View {
         let csv = getCSVData(fileName: fileName)
