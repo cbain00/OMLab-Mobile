@@ -202,18 +202,3 @@ class EyeTrackingRecording {
         eventFile!.write(line.data(using: .utf8)!)
     }
 }
-
-/*
- %
- figure
- subplot(5,1,1,'nextplot','add')
- plot(d.Time, [d.RightEyeX, d.LeftEyeX])
- subplot(5,1,2,'nextplot','add')
- plot(d.Time, [d.RightEyeY, d.LeftEyeY])
- subplot(5,1,3,'nextplot','add')
- plot(d.Time, [d.HeadX, d.HeadY, d.HeadZ])
- subplot(5,1,4,'nextplot','add')
- plot(d.Time, [d.Head30, d.Head31, d.Head32])
- subplot(5,1,5,'nextplot','add')
- plot(d.Time, [d.lookAtPoint0, d.lookAtPoint1, d.lookAtPoint2])
- */
