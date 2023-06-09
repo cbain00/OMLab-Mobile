@@ -74,7 +74,7 @@ struct FileDetailView: View {
                         Label("File Info", systemImage: "info.circle")
                     }
                     
-                    Button(action: {
+                    Button(role: .destructive, action: {
                         // allow user to attempt to delete file
                         Delete(file: fileName)
                     }) {
@@ -104,6 +104,7 @@ struct FileDetailView: View {
         .onAppear {
             viewModel.addRecentFile(file)
         }
+        
         .sheet(isPresented: $showRenameView) {
             RenameFileView(fileName: fileName, newFileName: $newFileName) { newName in
                 renameFile(fileName: fileName, newFileName: newName)
@@ -313,7 +314,6 @@ struct GraphView: View {
         var y: Double
     }
     
-    // https://medium.com/@deadbeef404/reading-a-csv-in-swift-7be7a20220c6
     // .contentsOfDirectory acts as a "double-click" on a folder
     func getCSVData(fileName: String) -> [String: [String]] {
         let fileManager = FileManager.default
