@@ -2,8 +2,8 @@
 //  FileViews.swift
 //  OMLab-Mobile-SwiftUI
 //
-// Abstract:
-// File to handle all file actions.
+//  Abstract:
+//  File to handle all file actions.
 //
 //  Created by Christopher Bain on 4/18/23.
 //
@@ -252,7 +252,6 @@ struct FileDetailView: View {
         let alertController = UIAlertController(title: "Delete File", message: "Are you sure you want to delete this file?", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
         let confirmDelete = UIAlertAction(title: "Delete", style: .destructive) { _ in
-            // Perform file deletion here
             viewModel.deleteFile(file)
             presentationMode.wrappedValue.dismiss()
         }
@@ -275,7 +274,6 @@ struct GraphView: View {
     var body: some View {
         let csv = getCSVData(fileName: fileName)
         if !csv.isEmpty {
-            // currently using right eye tracking data, in future this will either have multiple views or the user can pick what will be on y-axis
             let eyeData = makeDataArray(csv: csv, yvalue: yvalue)
             let xMin = eyeData.map { $0.x }.min() ?? 0; let xMax = eyeData.map { $0.x }.max() ?? 0
             let yMin = eyeData.map { $0.y }.min() ?? 0; let yMax = eyeData.map { $0.y }.max() ?? 0
@@ -294,7 +292,6 @@ struct GraphView: View {
                         .foregroundStyle(color)
                     }
                 }
-                //.chartAxesLabels(xLabel: Text("X Axis"), yLabel: Text("Y Axis"))
                 .chartXScale(domain: [xMin, xMax])
                 .chartYScale(domain: [yMin, yMax])
             }

@@ -31,10 +31,13 @@ struct HomeView: View {
 }
 
 struct HomeMenuView: View {
+    @State private var showReportView = false
     var body: some View {
         HStack {
             Menu {
-                Button(action: {}) {
+                Button(action: {
+                    showReportView = true
+                }) {
                     Label("Report a problem", systemImage: "exclamationmark.triangle.fill")
                 }
                 
@@ -55,8 +58,47 @@ struct HomeMenuView: View {
             }
         }
         .padding()
+        
+        .sheet(isPresented: $showReportView) {
+            ReportProblem(isSheetPresented: $showReportView)
+        }
     }
 }
+
+struct ReportProblem: View {
+    @Binding var isSheetPresented: Bool
+    
+    var body: some View {
+        VStack {
+            Text("Report a Problem")
+                .font(.title)
+                .fontWeight(.bold)
+            
+            // Add content for reporting a problem
+            
+            Button(action: {
+                // Handle report submission
+                
+                // Dismiss sheet
+                isSheetPresented = false
+            }) {
+                Text("Submit")
+                    .font(.headline)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+        .padding()
+        .navigationBarTitle(Text("Report a Problem"))
+        .onDisappear {
+            // Perform any necessary cleanup or post-submission actions here
+        }
+    }
+}
+
+
 
 struct SortByView: View {
     let header: String
@@ -77,6 +119,7 @@ struct SortByView: View {
         .padding(.horizontal, 20.0)
     }
 }
+
 
 struct SortingView: View {
     @Binding var sortOption: Int
@@ -107,6 +150,7 @@ struct SortingView: View {
     }
 }
 
+
 struct SortingButton: View {
     let title: String
     let isSelected: Bool
@@ -124,6 +168,7 @@ struct SortingButton: View {
         }
     }
 }
+
 
 struct SearchBarView: View {
     @ObservedObject private var viewModel = HomeView_ViewModel()
@@ -172,6 +217,7 @@ struct SearchBarView: View {
         }
     }
 }
+
 
 struct SearchBar: View {
     @Binding var text: String

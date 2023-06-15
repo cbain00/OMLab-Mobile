@@ -101,6 +101,13 @@ class EyeTrackingNetworkService: ObservableObject {
             if self.listening {
                 self.receive()
             }
+            
+            let sendString = "okay" + stringFromByteArray!
+            self.connection?.send(content: sendString.data(using: .utf8), completion: NWConnection.SendCompletion.contentProcessed({ sendError in
+                if sendError != nil {
+                    print(sendError!)
+                }
+            }))
         }
     }
     
