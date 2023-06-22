@@ -25,21 +25,36 @@ class EyeTrackingNetworkService: ObservableObject {
         self.init(on: NWEndpoint.Port(integerLiteral: NWEndpoint.Port.IntegerLiteralType(port)),viewController)
     }
     /// Use this init or the one that takes an Int to start the listener
-    init(on port: NWEndpoint.Port, _ viewController : EyeTrackingViewController ) {
+    init(on port: NWEndpoint.Port, _ viewController: EyeTrackingViewController) {
         self.viewController = viewController
         let params = NWParameters.udp
         params.allowFastOpen = true
+        // create listener with passed port number
+        self.initListener(port, params)
+    }
+
+    /// Create initListener function to handle statusUpdate, make recursive, clean old listener
+    func initListener(_ port: NWEndpoint.Port, _ params: NWParameters) {
+        // Initialize a new listener
         self.listener = try? NWListener(using: params, on: port)
         self.listener?.stateUpdateHandler = { update in
             switch update {
             case .ready:
                 self.isReady = true
                 print("Listener connected to port \(port)")
-            case .failed, .cancelled:
-                // Announce we are no longer able to listen
+            case .failed:
+                // Announce that we are no longer able to listen
                 self.listening = false
                 self.isReady = false
                 print("Listener disconnected from port \(port)")
+            case .cancelled:
+                // Clean up the old listener if it exists
+                self.listener?.cancel()
+                print("Listener disconnected from port \(port)")
+                print("\nAttemping reconnect...")
+                //print("Update value: \(update)")
+                self.initListener(port, params)
+                
             default:
                 print("Listener connecting to port \(port)...")
             }
@@ -50,7 +65,7 @@ class EyeTrackingNetworkService: ObservableObject {
         }
         self.listener?.start(queue: self.queue)
     }
-    
+
     func createConnection(connection: NWConnection) {
         self.connection = connection
         self.connection?.stateUpdateHandler = { (newState) in
@@ -77,11 +92,12 @@ class EyeTrackingNetworkService: ObservableObject {
                 print("Error: NWError received in \(#function) - \(unwrappedError)")
                 return
             }
+            
             guard isComplete, let data = data else {
                 print("Error: Received nil Data with context - \(String(describing: context))")
                 return
             }
-            //self.messageReceived = data
+            
             let stringFromByteArray = String(data: Data(_: data), encoding: .utf8)
             print(stringFromByteArray ?? "")
             self.messageReceived = stringFromByteArray

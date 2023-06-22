@@ -125,7 +125,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // Running AR Session
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
         let faceAnchor = anchors[0] as! ARFaceAnchor
-        eyeTrackingRecording.RecordData(recordingSwitchIsOn: recordingSwitch.isOn, session, faceAnchor, "test")
+        eyeTrackingRecording.RecordData(recordingSwitchIsOn: recordingSwitch.isOn, session, faceAnchor, "file")
         //self.displayFileNamer()
     }
 
