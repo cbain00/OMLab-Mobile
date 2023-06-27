@@ -41,6 +41,8 @@ class EyeTrackingNetworkService: ObservableObject {
             switch update {
             case .ready:
                 self.isReady = true
+                self.listening = true
+                print(self.listening)
                 print("Listener connected to port \(port)")
             case .failed:
                 // Announce that we are no longer able to listen
@@ -52,7 +54,6 @@ class EyeTrackingNetworkService: ObservableObject {
                 self.listener?.cancel()
                 print("Listener disconnected from port \(port)")
                 print("\nAttemping reconnect...")
-                //print("Update value: \(update)")
                 self.initListener(port, params)
                 
             default:
@@ -73,6 +74,7 @@ class EyeTrackingNetworkService: ObservableObject {
             case .ready:
                 print("Listener ready to receive message - \(connection)")
                 self.receive()
+                self.listening = true
             case .cancelled, .failed:
                 print("Listener failed to receive message - \(connection)")
                 // Cancel the listener, something went wrong
