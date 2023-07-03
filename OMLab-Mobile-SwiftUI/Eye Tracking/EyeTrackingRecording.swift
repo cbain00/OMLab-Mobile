@@ -2,7 +2,7 @@
 //  EyeTrackingRecording.swift
 //  ARKitFaceExample
 //
-//  Created by Jorge Otero-Millan on 6/29/22.
+//  Created by Jorge Otero-Millan and Christopher Bain.
 //  Copyright © 2022 Apple. All rights reserved.
 //
 
@@ -10,9 +10,9 @@ import ARKit
 import Foundation
 
 class EyeTrackingRecording {
-    
     var dataFile: FileHandle!
     var eventFile: FileHandle!
+    
     var dataFilePath: String = ""
     var eventFilePath: String = ""
     var folderName: String = ""
@@ -181,8 +181,10 @@ class EyeTrackingRecording {
         // If file exists, remove it
         if fileManager.fileExists(atPath: eventFilePath)
         {
-            do { try fileManager.removeItem(atPath: eventFilePath) }
-            catch let error{
+            do {
+                try fileManager.removeItem(atPath: eventFilePath)
+            }
+            catch let error {
                 print(error)
             }
         }

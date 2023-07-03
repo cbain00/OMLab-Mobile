@@ -11,16 +11,7 @@ struct CameraView: View {
     @State private var isRecording = false
     
     var body: some View {
-        ZStack {
-            EyeTrackingView().edgesIgnoringSafeArea(.all)
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    RecordButton(isRecording: isRecording, action: { isRecording.toggle() })
-                }
-            }
-        }
+        EyeTrackingView().edgesIgnoringSafeArea(.all)
     }
 }
 

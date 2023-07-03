@@ -11,6 +11,8 @@
 import SwiftUI
 import UIKit
 import Charts
+import AVKit
+import AVFoundation
 
 struct FileListView: View {
     @ObservedObject private var viewModel = HomeView_ViewModel()
@@ -36,6 +38,7 @@ struct FileDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var showRenameView = false
     @State private var showFileInfoView = false
+    @State private var isShowingVideoPlayer = false
     @State private var newFileName = ""
     
     var body: some View {
@@ -64,14 +67,20 @@ struct FileDetailView: View {
                         // allow user to share file
                         shareFile(fileName: fileName)
                     }) {
-                        Label("Export File", systemImage: "square.and.arrow.up")
+                        Label("Export CSV", systemImage: "square.and.arrow.up")
                     }
                     
                     Button(action: {
                         // show file info sheet
                         showFileInfoView = true
                     }) {
-                        Label("File Info", systemImage: "info.circle")
+                        Label("Folder Info", systemImage: "info.circle")
+                    }
+                    
+                    Button(action: {
+                        isShowingVideoPlayer = true
+                    }) {
+                        Label("Play Video", systemImage: "play.circle.fill")
                     }
                     
                     Button(role: .destructive, action: {
@@ -97,8 +106,12 @@ struct FileDetailView: View {
 
                 // head positions
                 GraphView(fileName: fileName, yvalue: "HeadX", color: .red)
-                GraphView(fileName: fileName, yvalue: "HeadY", color: .blue)
-                GraphView(fileName: fileName, yvalue: "HeadZ", color: .green)
+                GraphView(fileName: fileName, yvalue: "HeadY", color: .green)
+                GraphView(fileName: fileName, yvalue: "HeadZ", color: .blue)
+                
+                // to be developed
+                // GraphView(fileName: fileName, group: eyes)
+                // GraphView(fileName: fileName, group: head)
             }
         }
         .onAppear {
@@ -114,6 +127,10 @@ struct FileDetailView: View {
 
         .sheet(isPresented: $showFileInfoView) {
             FileInfoView(file: file)
+        }
+        
+        .sheet(isPresented: $isShowingVideoPlayer) {
+            DisplayEyeTrackingRecording(fileName: fileName)
         }
     }
     
@@ -158,7 +175,7 @@ struct FileDetailView: View {
                     Spacer()
                 }
                 
-                metadataField("Name:", value: "\(file.name).txt")
+                metadataField("Name:", value: "\(file.name)")
                 metadataField("Size:", value: "\(file.size) kB")
                 metadataField("Date Created:", value: "\(file.timestamp)")
                 metadataField("ID:", value: "\(file.id)")
@@ -193,6 +210,35 @@ struct FileDetailView: View {
         }
     }
 
+    struct DisplayEyeTrackingRecording: View {
+        var fileName: String
+        
+        var body: some View {
+            let fileManager = FileManager.default
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let fileFolderURL = documentsURL.appendingPathComponent(fileName)
+            
+            do {
+                let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+                
+                guard let mp4FileURL = filesURL.first(where: { $0.pathExtension == "mp4" }) else {
+                    print("No mp4 file found in the specified folder.")
+                    return AnyView(Text("No mp4 File Found")
+                        .font(.title3)
+                        .foregroundColor(.gray))
+                }
+                
+                return AnyView(VideoPlayer(player: AVPlayer(url: mp4FileURL)))
+                
+            } catch {
+                print("Unable to access directory: \(error)")
+                return AnyView(Text("Unable to Access Directory")
+                    .font(.title3)
+                    .foregroundColor(.gray))
+            }
+        }
+    }
+
     func renameFile(fileName: String, newFileName: String) {
         let fileManager = FileManager.default
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -220,8 +266,9 @@ struct FileDetailView: View {
         let fileFolderURL = documentsURL.appendingPathComponent(fileName)
         do {
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let csvFilesURLs = filesURL.filter { $0.pathExtension == "txt" }
             
-            guard let csvFileURL = filesURL.first else {
+            guard let csvFileURL = csvFilesURLs.first else {
                 print("No CSV file found in the specified folder.")
                 
                 let alertController = UIAlertController(title: "File Not Found", message: "Unable to find CSV file for export.", preferredStyle: .alert)
@@ -248,11 +295,16 @@ struct FileDetailView: View {
     func Delete(file: String) {
         let allScenes = UIApplication.shared.connectedScenes
         let scene = allScenes.first { $0.activationState == .foregroundActive }
+        let mp4Exists = checkForMP4(file: file)
         
         let alertController = UIAlertController(title: "Delete File", message: "Are you sure you want to delete this file?", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
         let confirmDelete = UIAlertAction(title: "Delete", style: .destructive) { _ in
             viewModel.deleteFile(file)
+            // added confirmation for deletions of old folders before videos were able to be recorded
+            if mp4Exists.exists {
+                viewModel.deleteFile(mp4Exists.path!)
+            }
             presentationMode.wrappedValue.dismiss()
         }
         
@@ -261,6 +313,27 @@ struct FileDetailView: View {
 
         if let windowScene = scene as? UIWindowScene {
                  windowScene.keyWindow?.rootViewController?.present(alertController, animated: true, completion: nil)
+        }
+    }
+    
+    func checkForMP4(file: String) -> (exists: Bool, path: String?) {
+        let fileManager = FileManager.default
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileFolderURL = documentsURL.appendingPathComponent(file)
+        
+        do {
+            let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            
+            guard let mp4FileURL = filesURL.first(where: { $0.pathExtension == "mp4" }) else {
+                print("No mp4 file found in the specified folder.")
+                return (false, nil)
+            }
+            
+            let mp4FileName = mp4FileURL.deletingPathExtension().lastPathComponent
+            return (true, mp4FileName)
+        } catch {
+            print("Unable to access directory: \(error)")
+            return (false, nil)
         }
     }
 }
@@ -322,12 +395,13 @@ struct GraphView: View {
         let fileFolderURL = documentsURL.appendingPathComponent(fileName)
         do {
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let csvFilesURLs = filesURL.filter { $0.pathExtension == "txt" }
             
-            guard let csvFileURL = filesURL.first else {
-                print("No CSV file found in the specified folder.")
+            guard let csvFileURL = csvFilesURLs.first else {
+                print("No txt file found in the specified folder.")
                 return [:]
             }
-            
+
             let content = try String(contentsOf: csvFileURL)
             let lines = content.components(separatedBy: "\n")
             

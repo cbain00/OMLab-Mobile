@@ -9,8 +9,10 @@ import ARKit
 import SceneKit
 import SwiftUI
 import UIKit
+import AVFoundation
+import ReplayKit
 
-class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFieldDelegate {
+class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFieldDelegate, AVCaptureFileOutputRecordingDelegate {
     
     // MARK: Outlets
     var sceneView: ARSCNView!
@@ -18,6 +20,11 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     weak var recordingName: UITextField!
     //weak var logTextView: UITextView!
     var isRecordingSwitchOn = false
+    
+    let recorder = RPScreenRecorder.shared()
+    var recordEngga = false
+    
+    var outputURL: URL!
 
     // https://stackoverflow.com/questions/35006738/auto-scroll-for-uitextview-using-swift-ios-app
     // MARK: Properties
@@ -45,6 +52,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         
         let recordingSwitch = UISwitch()
         recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
+        recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
         
         view.addSubview(recordingSwitch)
         
@@ -92,6 +100,17 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         return true
     }
     
+    @objc func buttonOnClick(_ sender: UISwitch) {
+        
+        if !recordEngga {
+            startRecordingReplayKit()
+        }
+        else {
+            stopRecordingReplayKit()
+        }
+        print("button pressed")
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -127,6 +146,50 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         let faceAnchor = anchors[0] as! ARFaceAnchor
         eyeTrackingRecording.RecordData(recordingSwitchIsOn: recordingSwitch.isOn, session, faceAnchor, "file")
         //self.displayFileNamer()
+    }
+    
+    // start screen recording after button is pressed
+    func startRecordingReplayKit() {
+        recorder.startRecording { (error) in
+            guard error == nil else{
+                print("failed to recording")
+                return
+            }
+            self.recordEngga = true
+        }
+    }
+    
+    // stop screen recording after button is pressed
+    func stopRecordingReplayKit() {
+        outputURL = tempURL()
+        recorder.stopRecording(withOutput: outputURL) { (error) in
+            guard error == nil else{
+                print("Failed to save")
+                return
+            }
+            print(self.outputURL!)
+            self.recordEngga = false
+        }
+    }
+
+    // create URL for video to be saved at
+    func tempURL() -> URL? {
+        let fileManager = FileManager.default
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let folderURL = documentsURL.appendingPathComponent(self.eyeTrackingRecording.folderName)
+        let fileURL = folderURL.appendingPathComponent(UUID().uuidString).appendingPathExtension("mp4")
+        return fileURL
+    }
+    
+    // AVCaptureFileOutputRecordingDelegate function stub
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if (error != nil) {
+            print("Error recording movie: \(error!.localizedDescription)")
+        } else {
+            let videoRecorded = outputURL! as URL
+            print(videoRecorded)
+            //performSegue(withIdentifier: "showVideo", sender: videoRecorded)
+        }
     }
 
     func displayFileNamer() {
