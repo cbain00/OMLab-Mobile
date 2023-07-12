@@ -14,7 +14,7 @@ struct HomeView: View {
         NavigationView {
             VStack {
                 // Displays home menu navigation bar
-                HomeMenuView()
+                HomeMenuView(viewModel: viewModel)
 
                 Divider()
 
@@ -22,7 +22,8 @@ struct HomeView: View {
                 SortByView(header: "Files", sortOption: $viewModel.sortOption)
 
                 // view for list of saved user files
-                FileListView()
+                FileListView(viewModel: viewModel)
+                
 
                 Spacer()
             }
@@ -31,7 +32,9 @@ struct HomeView: View {
 }
 
 struct HomeMenuView: View {
+    @ObservedObject var viewModel: HomeView_ViewModel
     @State private var showReportView = false
+    
     var body: some View {
         HStack {
             Menu {
@@ -53,7 +56,7 @@ struct HomeMenuView: View {
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity)
 
-            NavigationLink(destination: SearchBarView()) {
+            NavigationLink(destination: SearchBarView(viewModel: viewModel)) {
                 Image(systemName: "magnifyingglass")
             }
         }
@@ -65,6 +68,7 @@ struct HomeMenuView: View {
     }
 }
 
+// not fully implemented, problem reporting goes nowhere
 struct ReportProblem: View {
     @Binding var isSheetPresented: Bool
     
@@ -99,7 +103,6 @@ struct ReportProblem: View {
 }
 
 
-
 struct SortByView: View {
     let header: String
     let sortOption: Binding<Int>
@@ -112,7 +115,23 @@ struct SortByView: View {
             
             Spacer()
             
-            NavigationLink(destination: SortingView(sortOption: sortOption)) {
+            Menu {
+                Button(action: { sortOption.wrappedValue = 0 }) {
+                    Label("Newest to Oldest", systemImage: sortOption.wrappedValue == 0 ? "checkmark" : "")
+                }
+                Button(action: { sortOption.wrappedValue = 1 }) {
+                    Label("Oldest to Newest", systemImage: sortOption.wrappedValue == 1 ? "checkmark" : "")
+                }
+                Button(action: { sortOption.wrappedValue = 2 }) {
+                    Label("Alphabetical Order", systemImage: sortOption.wrappedValue == 2 ? "checkmark" : "")
+                }
+                Button(action: { sortOption.wrappedValue = 3 }) {
+                    Label("Smallest to Largest", systemImage: sortOption.wrappedValue == 3 ? "checkmark" : "")
+                }
+                Button(action: { sortOption.wrappedValue = 4 }) {
+                    Label("Largest to Smallest", systemImage: sortOption.wrappedValue == 4 ? "checkmark" : "")
+                }
+            } label: {
                 Image(systemName: "arrow.up.arrow.down")
             }
         }
@@ -120,7 +139,7 @@ struct SortByView: View {
     }
 }
 
-
+/*
 struct SortingView: View {
     @Binding var sortOption: Int
 
@@ -168,10 +187,10 @@ struct SortingButton: View {
         }
     }
 }
-
+*/
 
 struct SearchBarView: View {
-    @ObservedObject private var viewModel = HomeView_ViewModel()
+    @ObservedObject var viewModel: HomeView_ViewModel
     @State private var searchText = ""
     @State private var isSearching = true
     

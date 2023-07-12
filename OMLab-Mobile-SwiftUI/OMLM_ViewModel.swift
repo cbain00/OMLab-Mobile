@@ -8,7 +8,6 @@
 import SwiftUI
 
 class HomeView_ViewModel: ObservableObject {
-
     @Published var sortOption = 0 // default sorting option is "Newest to Oldest"
     @Published var files: [FileFolder] = []
     @Published var recentFiles: [FileFolder] = []

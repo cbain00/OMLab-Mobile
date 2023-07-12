@@ -3,7 +3,7 @@
 //  OMLab-Mobile-SwiftUI
 //
 //  Abstract:
-//  File to handle all file actions.
+//  File to handle all file-click actions including the list and detail views.
 //
 //  Created by Christopher Bain on 4/18/23.
 //
@@ -15,7 +15,7 @@ import AVKit
 import AVFoundation
 
 struct FileListView: View {
-    @ObservedObject private var viewModel = HomeView_ViewModel()
+    @ObservedObject var viewModel: HomeView_ViewModel
 
     var body: some View {
         List {
@@ -56,6 +56,14 @@ struct FileDetailView: View {
                 
                 Menu {
                     Button(action: {
+                        // play video recording
+                        isShowingVideoPlayer = true
+                    }) {
+                        Label("Play Session Recording", systemImage: "play.circle.fill")
+                    }
+                    .disabled(!checkForMP4(file: fileName).exists)
+
+                    Button(action: {
                         // Show rename view
                         showRenameView = true
                         newFileName = fileName
@@ -64,7 +72,7 @@ struct FileDetailView: View {
                     }
                     
                     Button(action: {
-                        // allow user to share file
+                        // allow user to share txt file data
                         shareFile(fileName: fileName)
                     }) {
                         Label("Export CSV", systemImage: "square.and.arrow.up")
@@ -75,12 +83,6 @@ struct FileDetailView: View {
                         showFileInfoView = true
                     }) {
                         Label("Folder Info", systemImage: "info.circle")
-                    }
-                    
-                    Button(action: {
-                        isShowingVideoPlayer = true
-                    }) {
-                        Label("Play Video", systemImage: "play.circle.fill")
                     }
                     
                     Button(role: .destructive, action: {
@@ -99,6 +101,8 @@ struct FileDetailView: View {
             
             // display graphs of data based on passed y-axis param
             ScrollView {
+                
+                /* old graph view versions
                 // right eye positions
                 GraphView(fileName: fileName, yvalue: "RightEyeX", color: .red)
                 GraphView(fileName: fileName, yvalue: "RightEyeY", color: .green)
@@ -108,10 +112,10 @@ struct FileDetailView: View {
                 GraphView(fileName: fileName, yvalue: "HeadX", color: .red)
                 GraphView(fileName: fileName, yvalue: "HeadY", color: .green)
                 GraphView(fileName: fileName, yvalue: "HeadZ", color: .blue)
+                */
                 
-                // to be developed
-                // GraphView(fileName: fileName, group: eyes)
-                // GraphView(fileName: fileName, group: head)
+                GraphView(fileName: fileName, group: .eyes)
+                GraphView(fileName: fileName, group: .head)
             }
         }
         .onAppear {
@@ -176,7 +180,7 @@ struct FileDetailView: View {
                 }
                 
                 metadataField("Name:", value: "\(file.name)")
-                metadataField("Size:", value: "\(file.size) kB")
+                metadataField("Folder Size:", value: "\(file.size) kB")
                 metadataField("Date Created:", value: "\(file.timestamp)")
                 metadataField("ID:", value: "\(file.id)")
                 
@@ -223,15 +227,20 @@ struct FileDetailView: View {
                 
                 guard let mp4FileURL = filesURL.first(where: { $0.pathExtension == "mp4" }) else {
                     print("No mp4 file found in the specified folder.")
+                    
                     return AnyView(Text("No mp4 File Found")
                         .font(.title3)
                         .foregroundColor(.gray))
                 }
                 
-                return AnyView(VideoPlayer(player: AVPlayer(url: mp4FileURL)))
+                let player = AVPlayer(url: mp4FileURL)
+                player.play() // Automatically start playing
                 
+                return AnyView(VideoPlayer(player: player))
+
             } catch {
                 print("Unable to access directory: \(error)")
+                
                 return AnyView(Text("Unable to Access Directory")
                     .font(.title3)
                     .foregroundColor(.gray))
@@ -325,12 +334,13 @@ struct FileDetailView: View {
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             
             guard let mp4FileURL = filesURL.first(where: { $0.pathExtension == "mp4" }) else {
-                print("No mp4 file found in the specified folder.")
+                print("No mp4 file found in folder: \(fileFolderURL.lastPathComponent).")
                 return (false, nil)
             }
             
             let mp4FileName = mp4FileURL.deletingPathExtension().lastPathComponent
             return (true, mp4FileName)
+            
         } catch {
             print("Unable to access directory: \(error)")
             return (false, nil)
@@ -340,41 +350,167 @@ struct FileDetailView: View {
 
 
 struct GraphView: View {
+    enum Group {
+        case eyes
+        case head
+    }
+
     var fileName: String
-    let yvalue: String
-    let color: Color
+    //let yvalue: String
+    let group: Group
     
     var body: some View {
-        let csv = getCSVData(fileName: fileName)
-        if !csv.isEmpty {
-            let eyeData = makeDataArray(csv: csv, yvalue: yvalue)
-            let xMin = eyeData.map { $0.x }.min() ?? 0; let xMax = eyeData.map { $0.x }.max() ?? 0
-            let yMin = eyeData.map { $0.y }.min() ?? 0; let yMax = eyeData.map { $0.y }.max() ?? 0
-            
-            VStack {
-                Text("\(yvalue)")
-                    .fontWeight(.bold)
+        switch group {
+        case .eyes:
+            let csv = getCSVData(fileName: fileName)
+            if csv.isEmpty {
+                Text("No Graph Available")
+                    .font(.title3)
+                    .foregroundColor(.gray)
+            } else {
+                let rightEyeXData = makeDataArray(csv: csv, yvalue: "RightEyeX")
+                let leftEyeXData = makeDataArray(csv: csv, yvalue: "LeftEyeX")
+                let rightEyeYData = makeDataArray(csv: csv, yvalue: "RightEyeY")
+                let leftEyeYData = makeDataArray(csv: csv, yvalue: "LeftEyeY")
                 
-                Chart {
-                    ForEach(eyeData, id: \.id) { item in
-                        LineMark(
-                            x: .value("Time", item.x),
-                            y: .value("Position", item.y),
-                            series: .value("Time", "Position")
-                        )
-                        .foregroundStyle(color)
+                let xMin_X = min(rightEyeXData.map { $0.x }.min() ?? 0, leftEyeXData.map { $0.x }.min() ?? 0)
+                let xMax_X = max(rightEyeXData.map { $0.x }.max() ?? 0, leftEyeXData.map { $0.x }.max() ?? 0)
+                let yMin_X = min(rightEyeXData.map { $0.y }.min() ?? 0, leftEyeXData.map { $0.y }.min() ?? 0)
+                let yMax_X = max(rightEyeXData.map { $0.y }.max() ?? 0, leftEyeXData.map { $0.y }.max() ?? 0)
+                
+                let xMin_Y = min(rightEyeYData.map { $0.x }.min() ?? 0, leftEyeYData.map { $0.x }.min() ?? 0)
+                let xMax_Y = max(rightEyeYData.map { $0.x }.max() ?? 0, leftEyeYData.map { $0.x }.max() ?? 0)
+                let yMin_Y = min(rightEyeYData.map { $0.y }.min() ?? 0, leftEyeYData.map { $0.y }.min() ?? 0)
+                let yMax_Y = max(rightEyeYData.map { $0.y }.max() ?? 0, leftEyeYData.map { $0.y }.max() ?? 0)
+                
+                VStack {
+                    // x data
+                    Text("Right/Left X Data")
+                        .fontWeight(.bold)
+                    
+                    Chart {
+                        ForEach(rightEyeXData, id: \.id) { item in
+                            LineMark(
+                                x: .value("Time", item.x),
+                                y: .value("RightEyeX", item.y),
+                                series: .value("Time", "RightEyeX")
+                            )
+                            .foregroundStyle(.red)
+                        }
+                        
+                        ForEach(leftEyeXData, id: \.id) { item in
+                            LineMark(
+                                x: .value("Time", item.x),
+                                y: .value("LeftEyeX", item.y),
+                                series: .value("Time", "LeftEyeX")
+                            )
+                            .foregroundStyle(.blue)
+                        }
                     }
+                    .chartXScale(domain: [xMin_X, xMax_X])
+                    .chartYScale(domain: [yMin_X, yMax_X])
+                    
+                    // y data
+                    Text("Right/Left Y Data")
+                        .fontWeight(.bold)
+                    
+                    Chart {
+                        ForEach(rightEyeYData, id: \.id) { item in
+                            LineMark(
+                                x: .value("Time", item.x),
+                                y: .value("RightEyeY", item.y),
+                                series: .value("Time", "RightEyeY")
+                            )
+                            .foregroundStyle(.red)
+                        }
+                        
+                        ForEach(leftEyeYData, id: \.id) { item in
+                            LineMark(
+                                x: .value("Time", item.x),
+                                y: .value("LeftEyeY", item.y),
+                                series: .value("Time", "LeftEyeY")
+                            )
+                            .foregroundStyle(.blue)
+                        }
+                    }
+                    .chartXScale(domain: [xMin_Y, xMax_Y])
+                    .chartYScale(domain: [yMin_Y, yMax_Y])
                 }
-                .chartXScale(domain: [xMin, xMax])
-                .chartYScale(domain: [yMin, yMax])
             }
             
-
-            
-        } else {
-            Text("No Graph Available")
-                .font(.title3)
-                .foregroundColor(.gray)
+        case .head:
+            let csv = getCSVData(fileName: fileName)
+            if csv.isEmpty {
+                Text("No Graph Available")
+                    .font(.title3)
+                    .foregroundColor(.gray)
+            } else {
+                let headXData = makeDataArray(csv: csv, yvalue: "HeadX")
+                let headYData = makeDataArray(csv: csv, yvalue: "HeadY")
+                let headZData = makeDataArray(csv: csv, yvalue: "HeadZ")
+                
+                // Find the lowest minimum and highest maximum values among the arrays
+                let xMin = min(
+                    headXData.map { $0.x }.min() ?? 0,
+                    headYData.map { $0.x }.min() ?? 0,
+                    headZData.map { $0.x }.min() ?? 0
+                )
+                
+                let xMax = max(
+                    headXData.map { $0.x }.max() ?? 0,
+                    headYData.map { $0.x }.max() ?? 0,
+                    headZData.map { $0.x }.max() ?? 0
+                )
+                
+                let yMin = min(
+                    headXData.map { $0.y }.min() ?? 0,
+                    headYData.map { $0.y }.min() ?? 0,
+                    headZData.map { $0.y }.min() ?? 0
+                )
+                
+                let yMax = max(
+                    headXData.map { $0.y }.max() ?? 0,
+                    headYData.map { $0.y }.max() ?? 0,
+                    headZData.map { $0.y }.max() ?? 0
+                )
+                
+                VStack {
+                    // x data
+                    Text("Head Data (All Axes)")
+                        .fontWeight(.bold)
+                    
+                    Chart {
+                        ForEach(headXData, id: \.id) { item in
+                            LineMark(
+                                x: .value("Time", item.x),
+                                y: .value("HeadX", item.y),
+                                series: .value("Time", "HeadX")
+                            )
+                            .foregroundStyle(.red)
+                        }
+                        
+                        ForEach(headYData, id: \.id) { item in
+                            LineMark(
+                                x: .value("Time", item.x),
+                                y: .value("HeadY", item.y),
+                                series: .value("Time", "HeadY")
+                            )
+                            .foregroundStyle(.blue)
+                        }
+                        
+                        ForEach(headZData, id: \.id) { item in
+                            LineMark(
+                                x: .value("Time", item.x),
+                                y: .value("HeadZ", item.y),
+                                series: .value("Time", "HeadZ")
+                            )
+                            .foregroundStyle(.green)
+                        }
+                    }
+                    .chartXScale(domain: [xMin, xMax])
+                    .chartYScale(domain: [yMin, yMax])
+                }
+            }
         }
     }
     
