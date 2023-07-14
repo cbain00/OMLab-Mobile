@@ -117,19 +117,19 @@ struct SortByView: View {
             
             Menu {
                 Button(action: { sortOption.wrappedValue = 0 }) {
-                    Label("Newest to Oldest", systemImage: sortOption.wrappedValue == 0 ? "checkmark" : "")
+                    Label("Newest to Oldest", systemImage: sortOption.wrappedValue == 0 ? "checkmark" : String())
                 }
                 Button(action: { sortOption.wrappedValue = 1 }) {
-                    Label("Oldest to Newest", systemImage: sortOption.wrappedValue == 1 ? "checkmark" : "")
+                    Label("Oldest to Newest", systemImage: sortOption.wrappedValue == 1 ? "checkmark" : String())
                 }
                 Button(action: { sortOption.wrappedValue = 2 }) {
-                    Label("Alphabetical Order", systemImage: sortOption.wrappedValue == 2 ? "checkmark" : "")
+                    Label("Alphabetical Order", systemImage: sortOption.wrappedValue == 2 ? "checkmark" : String())
                 }
                 Button(action: { sortOption.wrappedValue = 3 }) {
-                    Label("Smallest to Largest", systemImage: sortOption.wrappedValue == 3 ? "checkmark" : "")
+                    Label("Smallest to Largest", systemImage: sortOption.wrappedValue == 3 ? "checkmark" : String())
                 }
                 Button(action: { sortOption.wrappedValue = 4 }) {
-                    Label("Largest to Smallest", systemImage: sortOption.wrappedValue == 4 ? "checkmark" : "")
+                    Label("Largest to Smallest", systemImage: sortOption.wrappedValue == 4 ? "checkmark" : String())
                 }
             } label: {
                 Image(systemName: "arrow.up.arrow.down")

@@ -22,7 +22,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     var isRecordingSwitchOn = false
     
     let recorder = RPScreenRecorder.shared()
-    var recordEngga = false
+    var recordBool = false
     
     var outputURL: URL!
 
@@ -102,9 +102,10 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     
     @objc func buttonOnClick(_ sender: UISwitch) {
         
-        if !recordEngga {
+        if sender.isOn {
             startRecordingReplayKit()
         }
+        
         else {
             stopRecordingReplayKit()
         }
@@ -151,24 +152,28 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // start screen recording after button is pressed
     func startRecordingReplayKit() {
         recorder.startRecording { (error) in
-            guard error == nil else{
-                print("failed to recording")
+            guard error == nil else {
+                print("Failed to start recording")
                 return
             }
-            self.recordEngga = true
         }
     }
     
     // stop screen recording after button is pressed
     func stopRecordingReplayKit() {
-        outputURL = tempURL()
-        recorder.stopRecording(withOutput: outputURL) { (error) in
-            guard error == nil else{
-                print("Failed to save")
-                return
+        // if recording, stop recording, else don't do anything
+        // this is to avoid permission being presented twice
+        if recorder.isRecording {
+            outputURL = tempURL()
+            recorder.stopRecording(withOutput: outputURL) { (error) in
+                guard error == nil else {
+                    print("Failed to save recording")
+                    return
+                }
+                print(self.outputURL!)
             }
-            print(self.outputURL!)
-            self.recordEngga = false
+        } else {
+            return
         }
     }
 
@@ -187,8 +192,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             print("Error recording movie: \(error!.localizedDescription)")
         } else {
             let videoRecorded = outputURL! as URL
-            print(videoRecorded)
-            //performSegue(withIdentifier: "showVideo", sender: videoRecorded)
+            print("File saved successfully as: \(videoRecorded)")
         }
     }
 

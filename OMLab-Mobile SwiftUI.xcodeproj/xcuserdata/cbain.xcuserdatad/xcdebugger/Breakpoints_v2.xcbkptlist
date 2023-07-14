@@ -55,70 +55,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "3BF231D6-FB49-4A9D-942D-3F477B045FC6"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "OMLab-Mobile-SwiftUI/FileViews.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "531"
-            endingLineNumber = "531"
-            landmarkName = "getCSVData(fileName:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "3BF231D6-FB49-4A9D-942D-3F477B045FC6 - 73053e430caa0645"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "OMLab_Mobile_SwiftUI.GraphView.getCSVData(fileName: Swift.String) -&gt; Swift.Dictionary&lt;Swift.String, Swift.Array&lt;Swift.String&gt;&gt;"
-                  moduleName = "OMLab-Mobile-SwiftUI"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/FileViews.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "322"
-                  endingLineNumber = "322"
-                  offsetFromSymbolStart = "900">
-               </Location>
-               <Location
-                  uuid = "3BF231D6-FB49-4A9D-942D-3F477B045FC6 - 73053e430caa0645"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "OMLab_Mobile_SwiftUI.GraphView.getCSVData(fileName: Swift.String) -&gt; Swift.Dictionary&lt;Swift.String, Swift.Array&lt;Swift.String&gt;&gt;"
-                  moduleName = "OMLab-Mobile-SwiftUI"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/FileViews.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "322"
-                  endingLineNumber = "322"
-                  offsetFromSymbolStart = "904">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "85A7EB5D-DFFC-4725-894B-53FC2D676D36"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "OMLab-Mobile-SwiftUI/FileViews.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "29"
-            endingLineNumber = "29"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "841E4839-A1A7-492C-BAA3-2FAA4CA28088"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -126,8 +62,8 @@
             filePath = "OMLab-Mobile-SwiftUI/OMLM_ViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "82"
-            endingLineNumber = "82"
+            startingLineNumber = "88"
+            endingLineNumber = "88"
             landmarkName = "makeFileList()"
             landmarkType = "7">
             <Locations>
@@ -174,58 +110,10 @@
             filePath = "OMLab-Mobile-SwiftUI/OMLM_ViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "79"
-            endingLineNumber = "79"
-            landmarkName = "setFileList()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "80F4246C-68EF-4DCF-999B-C7F06E54AAAA"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "OMLab-Mobile-SwiftUI/FileViews.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "22"
-            endingLineNumber = "22"
-            landmarkName = "body"
-            landmarkType = "24">
-            <Locations>
-               <Location
-                  uuid = "80F4246C-68EF-4DCF-999B-C7F06E54AAAA - 2aa9c62d774c4b22"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; SwiftUI.ForEach&lt;Swift.Array&lt;OMLab_Mobile_SwiftUI.FileFolder&gt;, OMLab_Mobile_SwiftUI.FileFolder, SwiftUI.NavigationLink&lt;SwiftUI.Text, OMLab_Mobile_SwiftUI.FileDetailView&gt;&gt; in OMLab_Mobile_SwiftUI.FileListView.body.getter : some"
-                  moduleName = "OMLab-Mobile-SwiftUI"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/FileViews.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "22"
-                  endingLineNumber = "22"
-                  offsetFromSymbolStart = "228">
-               </Location>
-               <Location
-                  uuid = "80F4246C-68EF-4DCF-999B-C7F06E54AAAA - f7263f036277aa87"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (OMLab_Mobile_SwiftUI.FileFolder) -&gt; SwiftUI.NavigationLink&lt;SwiftUI.Text, OMLab_Mobile_SwiftUI.FileDetailView&gt; in closure #1 () -&gt; SwiftUI.ForEach&lt;Swift.Array&lt;OMLab_Mobile_SwiftUI.FileFolder&gt;, OMLab_Mobile_SwiftUI.FileFolder, SwiftUI.NavigationLink&lt;SwiftUI.Text, OMLab_Mobile_SwiftUI.FileDetailView&gt;&gt; in OMLab_Mobile_SwiftUI.FileListView.body.getter : some"
-                  moduleName = "OMLab-Mobile-SwiftUI"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/cbain/Developer/OMLab-Mobile%20SwiftUI/OMLab-Mobile-SwiftUI/FileViews.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "23"
-                  endingLineNumber = "23"
-                  offsetFromSymbolStart = "408">
-               </Location>
-            </Locations>
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "HomeView_ViewModel"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

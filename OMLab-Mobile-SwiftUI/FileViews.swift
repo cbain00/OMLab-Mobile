@@ -93,14 +93,13 @@ struct FileDetailView: View {
                     }
                     
                 } label: {
-                    Image(systemName: "ellipsis")
+                    Image(systemName: "list.bullet")
                         .frame(width: 25, height: 15, alignment: .trailing)
                 }
             }
             .padding(.horizontal)
             
             // display graphs of data based on passed y-axis param
-            ScrollView {
                 
                 /* old graph view versions
                 // right eye positions
@@ -116,7 +115,6 @@ struct FileDetailView: View {
                 
                 GraphView(fileName: fileName, group: .eyes)
                 GraphView(fileName: fileName, group: .head)
-            }
         }
         .onAppear {
             viewModel.addRecentFile(file)
@@ -125,6 +123,7 @@ struct FileDetailView: View {
         .sheet(isPresented: $showRenameView) {
             RenameFileView(fileName: fileName, newFileName: $newFileName) { newName in
                 renameFile(fileName: fileName, newFileName: newName)
+                viewModel.removeFromRecentFiles(file)
                 showRenameView = false
             }
         }
@@ -310,7 +309,7 @@ struct FileDetailView: View {
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
         let confirmDelete = UIAlertAction(title: "Delete", style: .destructive) { _ in
             viewModel.deleteFile(file)
-            // added confirmation for deletions of old folders before videos were able to be recorded
+            // added confirmation to see if video exists (user can deny permissions to record screen
             if mp4Exists.exists {
                 viewModel.deleteFile(mp4Exists.path!)
             }
@@ -334,7 +333,7 @@ struct FileDetailView: View {
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             
             guard let mp4FileURL = filesURL.first(where: { $0.pathExtension == "mp4" }) else {
-                print("No mp4 file found in folder: \(fileFolderURL.lastPathComponent).")
+                //print("No mp4 file found in folder: \(fileFolderURL.lastPathComponent).")
                 return (false, nil)
             }
             
@@ -356,7 +355,6 @@ struct GraphView: View {
     }
 
     var fileName: String
-    //let yvalue: String
     let group: Group
     
     var body: some View {
@@ -369,23 +367,21 @@ struct GraphView: View {
                     .foregroundColor(.gray)
             } else {
                 let rightEyeXData = makeDataArray(csv: csv, yvalue: "RightEyeX")
-                let leftEyeXData = makeDataArray(csv: csv, yvalue: "LeftEyeX")
                 let rightEyeYData = makeDataArray(csv: csv, yvalue: "RightEyeY")
-                let leftEyeYData = makeDataArray(csv: csv, yvalue: "LeftEyeY")
                 
-                let xMin_X = min(rightEyeXData.map { $0.x }.min() ?? 0, leftEyeXData.map { $0.x }.min() ?? 0)
-                let xMax_X = max(rightEyeXData.map { $0.x }.max() ?? 0, leftEyeXData.map { $0.x }.max() ?? 0)
-                let yMin_X = min(rightEyeXData.map { $0.y }.min() ?? 0, leftEyeXData.map { $0.y }.min() ?? 0)
-                let yMax_X = max(rightEyeXData.map { $0.y }.max() ?? 0, leftEyeXData.map { $0.y }.max() ?? 0)
+                let xMin_X = rightEyeXData.map { $0.x }.min() ?? 0
+                let xMax_X = rightEyeXData.map { $0.x }.max() ?? 0
+                let yMin_X = rightEyeXData.map { $0.y }.min() ?? 0
+                let yMax_X = rightEyeXData.map { $0.y }.max() ?? 0
                 
-                let xMin_Y = min(rightEyeYData.map { $0.x }.min() ?? 0, leftEyeYData.map { $0.x }.min() ?? 0)
-                let xMax_Y = max(rightEyeYData.map { $0.x }.max() ?? 0, leftEyeYData.map { $0.x }.max() ?? 0)
-                let yMin_Y = min(rightEyeYData.map { $0.y }.min() ?? 0, leftEyeYData.map { $0.y }.min() ?? 0)
-                let yMax_Y = max(rightEyeYData.map { $0.y }.max() ?? 0, leftEyeYData.map { $0.y }.max() ?? 0)
+                let xMin_Y = rightEyeYData.map { $0.x }.min() ?? 0
+                let xMax_Y = rightEyeYData.map { $0.x }.max() ?? 0
+                let yMin_Y = rightEyeYData.map { $0.y }.min() ?? 0
+                let yMax_Y = rightEyeYData.map { $0.y }.max() ?? 0
                 
                 VStack {
                     // x data
-                    Text("Right/Left X Data")
+                    Text("Eye Horizontal (deg)")
                         .fontWeight(.bold)
                     
                     Chart {
@@ -397,21 +393,15 @@ struct GraphView: View {
                             )
                             .foregroundStyle(.red)
                         }
-                        
-                        ForEach(leftEyeXData, id: \.id) { item in
-                            LineMark(
-                                x: .value("Time", item.x),
-                                y: .value("LeftEyeX", item.y),
-                                series: .value("Time", "LeftEyeX")
-                            )
-                            .foregroundStyle(.blue)
-                        }
                     }
                     .chartXScale(domain: [xMin_X, xMax_X])
                     .chartYScale(domain: [yMin_X, yMax_X])
+                    .chartYAxis {
+                        AxisMarks(position: .leading)
+                    }
                     
                     // y data
-                    Text("Right/Left Y Data")
+                    Text("Eye Vertical (deg)")
                         .fontWeight(.bold)
                     
                     Chart {
@@ -421,25 +411,24 @@ struct GraphView: View {
                                 y: .value("RightEyeY", item.y),
                                 series: .value("Time", "RightEyeY")
                             )
-                            .foregroundStyle(.red)
-                        }
-                        
-                        ForEach(leftEyeYData, id: \.id) { item in
-                            LineMark(
-                                x: .value("Time", item.x),
-                                y: .value("LeftEyeY", item.y),
-                                series: .value("Time", "LeftEyeY")
-                            )
                             .foregroundStyle(.blue)
                         }
                     }
                     .chartXScale(domain: [xMin_Y, xMax_Y])
                     .chartYScale(domain: [yMin_Y, yMax_Y])
+                    .chartYAxis {
+                        AxisMarks(position: .leading)
+                    }
                 }
             }
-            
+
         case .head:
             let csv = getCSVData(fileName: fileName)
+            let headData = [
+                (color: Color.red, name: "Yaw"),
+                (color: Color.blue, name: "Pitch"),
+                (color: Color.green, name: "Roll")
+            ]
             if csv.isEmpty {
                 Text("No Graph Available")
                     .font(.title3)
@@ -475,8 +464,7 @@ struct GraphView: View {
                 )
                 
                 VStack {
-                    // x data
-                    Text("Head Data (All Axes)")
+                    Text("Head (deg)")
                         .fontWeight(.bold)
                     
                     Chart {
@@ -484,7 +472,7 @@ struct GraphView: View {
                             LineMark(
                                 x: .value("Time", item.x),
                                 y: .value("HeadX", item.y),
-                                series: .value("Time", "HeadX")
+                                series: .value("Time", "Yaw")
                             )
                             .foregroundStyle(.red)
                         }
@@ -493,7 +481,7 @@ struct GraphView: View {
                             LineMark(
                                 x: .value("Time", item.x),
                                 y: .value("HeadY", item.y),
-                                series: .value("Time", "HeadY")
+                                series: .value("Time", "Pitch")
                             )
                             .foregroundStyle(.blue)
                         }
@@ -502,13 +490,31 @@ struct GraphView: View {
                             LineMark(
                                 x: .value("Time", item.x),
                                 y: .value("HeadZ", item.y),
-                                series: .value("Time", "HeadZ")
+                                series: .value("Time", "Roll")
                             )
                             .foregroundStyle(.green)
                         }
                     }
+                    .chartForegroundStyleScale(["Yaw": .red, "Pitch": .blue, "Roll": .green])
+                    .chartLegend(position: .top, alignment: .center) {
+                        HStack {
+                            ForEach(headData, id: \.name) { data in
+                                HStack {
+                                    BasicChartSymbolShape.circle
+                                        .foregroundColor(data.color)
+                                        .frame(width: 8, height: 8)
+                                    Text(data.name)
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                }
+                            }
+                        }
+                    }
                     .chartXScale(domain: [xMin, xMax])
                     .chartYScale(domain: [yMin, yMax])
+                    .chartYAxis {
+                        AxisMarks(position: .leading)
+                    }
                 }
             }
         }

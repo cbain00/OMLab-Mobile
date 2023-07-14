@@ -44,6 +44,12 @@ class HomeView_ViewModel: ObservableObject {
             recentFiles.insert(file, at: 0)
         }
     }
+    
+    func removeFromRecentFiles(_ file: FileFolder) {
+        if let index = recentFiles.firstIndex(of: file) {
+            recentFiles.remove(at: index)
+        }
+    }
 
     // Displays the contents of all text files in a specific save file's documents directory to the console
     func displayTxtFiles() {
