@@ -245,7 +245,9 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     }
     
     func recordEvent(_ message: String) {
-        eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: recordingSwitch.isOn, message, recordingName.text ?? "test")
+        DispatchQueue.main.async {
+            self.eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: self.recordingSwitch.isOn, message, "file")
+        }
     }
     
     /// - Tag: ARFaceTrackingSetup

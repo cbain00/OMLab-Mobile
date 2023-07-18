@@ -149,7 +149,7 @@ class HomeView_ViewModel: ObservableObject {
         return totalSize
     }
 
-    func deleteFile(_ file: String) {
+    func deleteFolder(_ file: String) {
         // Perform the deletion logic here
         let fileManager = FileManager.default
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -157,9 +157,9 @@ class HomeView_ViewModel: ObservableObject {
         
         do {
             try fileManager.removeItem(at: fileURL)
+            print("\(file) deleted successfully.")
         } catch {
             print("Error deleting file: \(error.localizedDescription)")
         }
-        print("\(file) deleted successfully.")
     }
 }

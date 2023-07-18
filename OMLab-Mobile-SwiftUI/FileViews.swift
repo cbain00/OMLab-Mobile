@@ -39,8 +39,9 @@ struct FileDetailView: View {
     @State private var showRenameView = false
     @State private var showFileInfoView = false
     @State private var isShowingVideoPlayer = false
+    @State private var isShowingLog = false
     @State private var newFileName = ""
-    
+        
     var body: some View {
         let fileName = file.name
         
@@ -51,68 +52,86 @@ struct FileDetailView: View {
                 Text(fileName)
                     .font(.title3)
                     .fontWeight(.bold)
-                
-                Spacer()
-                
-                Menu {
-                    Button(action: {
-                        // play video recording
-                        isShowingVideoPlayer = true
-                    }) {
-                        Label("Play Session Recording", systemImage: "play.circle.fill")
-                    }
-                    .disabled(!checkForMP4(file: fileName).exists)
+                    .toolbar {
+                        ToolbarItem(placement: .primaryAction) {
+                            Menu {
+                                Section {
+                                    Button(action: {
+                                        // play video recording
+                                        isShowingVideoPlayer = true
+                                    }) {
+                                        Label("Play Session Recording", systemImage: "play.circle.fill")
+                                    }
+                                    .disabled(!checkForMP4(file: fileName).exists)
+                                    
+                                    Button(action: {
+                                        // show file info sheet
+                                        isShowingLog = true
+                                    }) {
+                                        Label("View Session Log", systemImage: "list.bullet.rectangle.portrait.fill")
+                                    }
+                                    .disabled(!checkForEventFile(file: fileName).exists)
+                                }
+                                
+                                Section {
+                                    Menu("Export") {
+                                        Button(action: {}) {
+                                            Label("Export Zip", systemImage: "archivebox")
+                                        }
+                                        
+                                        Button(action: {
+                                            // allow user to share txt file data
+                                            shareFile(fileName: fileName)
+                                        }) {
+                                            Label("Export Tracking Data", systemImage: "doc.text")
+                                        }
+                                        
+                                        Button(action: {}) {
+                                            Label("Export Video", systemImage: "play.rectangle")
+                                        }
+                                        
+                                        Button(action: {}) {
+                                            Label("Export Session Log", systemImage: "doc.text")
+                                        }
+                                    }
+                                    
+                                    Button(action: {
+                                        // Show rename view
+                                        showRenameView = true
+                                        newFileName = fileName
+                                    }) {
+                                        Label("Rename", systemImage: "pencil")
+                                    }
+                                    
+                                    Button(action: {
+                                        // show file info sheet
+                                        showFileInfoView = true
+                                    }) {
+                                        Label("Folder Info", systemImage: "info.circle")
+                                    }
+                                }
 
-                    Button(action: {
-                        // Show rename view
-                        showRenameView = true
-                        newFileName = fileName
-                    }) {
-                        Label("Rename", systemImage: "pencil")
+                                Section {
+                                    Button(role: .destructive, action: {
+                                        // allow user to attempt to delete file
+                                        Delete(fileName: fileName, file: file)
+                                    }) {
+                                        Label("Delete", systemImage: "trash.fill")
+                                    }
+                                }
+                                
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .frame(width: 25, height: 15, alignment: .trailing)
+                            }
+                        }
                     }
-                    
-                    Button(action: {
-                        // allow user to share txt file data
-                        shareFile(fileName: fileName)
-                    }) {
-                        Label("Export CSV", systemImage: "square.and.arrow.up")
-                    }
-                    
-                    Button(action: {
-                        // show file info sheet
-                        showFileInfoView = true
-                    }) {
-                        Label("Folder Info", systemImage: "info.circle")
-                    }
-                    
-                    Button(role: .destructive, action: {
-                        // allow user to attempt to delete file
-                        Delete(file: fileName)
-                    }) {
-                        Label("Delete", systemImage: "trash.fill")
-                    }
-                    
-                } label: {
-                    Image(systemName: "list.bullet")
-                        .frame(width: 25, height: 15, alignment: .trailing)
-                }
+                Spacer()
             }
             .padding(.horizontal)
             
-            // display graphs of data based on passed y-axis param
-                
-                /* old graph view versions
-                // right eye positions
-                GraphView(fileName: fileName, yvalue: "RightEyeX", color: .red)
-                GraphView(fileName: fileName, yvalue: "RightEyeY", color: .green)
-                GraphView(fileName: fileName, yvalue: "RightEyeZ", color: .blue)
-
-                // head positions
-                GraphView(fileName: fileName, yvalue: "HeadX", color: .red)
-                GraphView(fileName: fileName, yvalue: "HeadY", color: .green)
-                GraphView(fileName: fileName, yvalue: "HeadZ", color: .blue)
-                */
-                
+                Spacer()
+                            
                 GraphView(fileName: fileName, group: .eyes)
                 GraphView(fileName: fileName, group: .head)
         }
@@ -134,6 +153,10 @@ struct FileDetailView: View {
         
         .sheet(isPresented: $isShowingVideoPlayer) {
             DisplayEyeTrackingRecording(fileName: fileName)
+        }
+        
+        .sheet(isPresented: $isShowingLog) {
+            DisplaySessionLog(fileName: fileName)
         }
     }
     
@@ -246,6 +269,57 @@ struct FileDetailView: View {
             }
         }
     }
+    
+    struct DisplaySessionLog: View {
+        var fileName: String
+        @State private var fileContent: String = ""
+        @State private var fileError: Error?
+
+        var body: some View {
+            let fileManager = FileManager.default
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let fileFolderURL = documentsURL.appendingPathComponent(fileName)
+            
+            Task {
+                do {
+                    let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+                    
+                    if let eventFileURL = filesURL.first(where: { $0.lastPathComponent.contains("_events.txt") }) {
+                        let content = try String(contentsOf: eventFileURL)
+                        fileContent = content.isEmpty ? "Log File Empty" : content
+                    } else {
+                        print("No session log file found in the specified folder.")
+                        fileContent = "No session log file found in folder."
+                    }
+                } catch {
+                    fileError = error
+                }
+            }
+            
+            if let error = fileError {
+                return AnyView(
+                    Text("Error: \(error.localizedDescription)")
+                        .font(.title3)
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .padding()
+                )
+            } else {
+                return AnyView(
+                    VStack {
+                        Text("Session Log")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                        
+                        Text(fileContent)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .padding()
+                )
+            }
+        }
+    }
+
 
     func renameFile(fileName: String, newFileName: String) {
         let fileManager = FileManager.default
@@ -262,16 +336,20 @@ struct FileDetailView: View {
     }
     
     func shareFile(fileName: String) {
+        enum FileType {
+            case zip
+            case eyeData
+            case video
+            case log
+        }
+        
         let allScenes = UIApplication.shared.connectedScenes
         let scene = allScenes.first { $0.activationState == .foregroundActive }
 
         let fileManager = FileManager.default
-        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            print("Failed to access documents directory.")
-            return
-        }
-        
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileFolderURL = documentsURL.appendingPathComponent(fileName)
+        
         do {
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             let csvFilesURLs = filesURL.filter { $0.pathExtension == "txt" }
@@ -300,19 +378,16 @@ struct FileDetailView: View {
         }
     }
     
-    func Delete(file: String) {
+    func Delete(fileName: String, file: FileFolder) {
         let allScenes = UIApplication.shared.connectedScenes
         let scene = allScenes.first { $0.activationState == .foregroundActive }
-        let mp4Exists = checkForMP4(file: file)
         
         let alertController = UIAlertController(title: "Delete File", message: "Are you sure you want to delete this file?", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+        
         let confirmDelete = UIAlertAction(title: "Delete", style: .destructive) { _ in
-            viewModel.deleteFile(file)
-            // added confirmation to see if video exists (user can deny permissions to record screen
-            if mp4Exists.exists {
-                viewModel.deleteFile(mp4Exists.path!)
-            }
+            viewModel.deleteFolder(fileName)
+            viewModel.removeFromRecentFiles(file)
             presentationMode.wrappedValue.dismiss()
         }
         
@@ -345,6 +420,28 @@ struct FileDetailView: View {
             return (false, nil)
         }
     }
+    
+    func checkForEventFile(file: String) -> (exists: Bool, path: String?) {
+        let fileManager = FileManager.default
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileFolderURL = documentsURL.appendingPathComponent(file)
+        
+        do {
+            let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            
+            if let eventFileURL = filesURL.first(where: { $0.lastPathComponent.contains("_events.txt") }) {
+                let eventFileName = eventFileURL.deletingPathExtension().lastPathComponent
+                return (true, eventFileName)
+            } else {
+                //print("No event file file found in folder: \(fileFolderURL.lastPathComponent).")
+                return (false, nil)
+            }
+        } catch {
+            print("Unable to access directory: \(error)")
+            return (false, nil)
+        }
+    }
+
 }
 
 
@@ -595,3 +692,18 @@ struct GraphView: View {
         return dataArray
     }
 }
+
+// display graphs of data based on passed y-axis param
+    
+    /* old graph view versions
+    // right eye positions
+    GraphView(fileName: fileName, yvalue: "RightEyeX", color: .red)
+    GraphView(fileName: fileName, yvalue: "RightEyeY", color: .green)
+    GraphView(fileName: fileName, yvalue: "RightEyeZ", color: .blue)
+
+    // head positions
+    GraphView(fileName: fileName, yvalue: "HeadX", color: .red)
+    GraphView(fileName: fileName, yvalue: "HeadY", color: .green)
+    GraphView(fileName: fileName, yvalue: "HeadZ", color: .blue)
+    */
+

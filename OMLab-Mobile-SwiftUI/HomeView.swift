@@ -139,55 +139,6 @@ struct SortByView: View {
     }
 }
 
-/*
-struct SortingView: View {
-    @Binding var sortOption: Int
-
-    var body: some View {
-        List {
-            SortingButton(title: "Newest to Oldest", isSelected: sortOption == 0) {
-                sortOption = 0
-            }
-            
-            SortingButton(title: "Oldest to Newest", isSelected: sortOption == 1) {
-                sortOption = 1
-            }
-            
-            SortingButton(title: "Alphabetical Order", isSelected: sortOption == 2) {
-                sortOption = 2
-            }
-            
-             SortingButton(title: "File Size (Smallest to Largest)", isSelected: sortOption == 3) {
-                 sortOption = 3
-             }
-            
-            SortingButton(title: "File Size (Largest to Smallest)", isSelected: sortOption == 4) {
-                sortOption = 4
-            }
-
-        }
-    }
-}
-
-
-struct SortingButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Text(title)
-                Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark")
-                }
-            }
-        }
-    }
-}
-*/
 
 struct SearchBarView: View {
     @ObservedObject var viewModel: HomeView_ViewModel
@@ -259,3 +210,53 @@ struct SearchBar: View {
         .padding(.horizontal)
     }
 }
+
+/*
+struct SortingView: View {
+    @Binding var sortOption: Int
+
+    var body: some View {
+        List {
+            SortingButton(title: "Newest to Oldest", isSelected: sortOption == 0) {
+                sortOption = 0
+            }
+            
+            SortingButton(title: "Oldest to Newest", isSelected: sortOption == 1) {
+                sortOption = 1
+            }
+            
+            SortingButton(title: "Alphabetical Order", isSelected: sortOption == 2) {
+                sortOption = 2
+            }
+            
+             SortingButton(title: "File Size (Smallest to Largest)", isSelected: sortOption == 3) {
+                 sortOption = 3
+             }
+            
+            SortingButton(title: "File Size (Largest to Smallest)", isSelected: sortOption == 4) {
+                sortOption = 4
+            }
+
+        }
+    }
+}
+
+
+struct SortingButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                }
+            }
+        }
+    }
+}
+*/

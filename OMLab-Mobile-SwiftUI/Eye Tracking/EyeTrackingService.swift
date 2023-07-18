@@ -107,12 +107,15 @@ class EyeTrackingNetworkService: ObservableObject {
                 case "StartRecording" :
                 DispatchQueue.main.async {
                     self.viewController.recordingSwitch.isOn = true
+                    self.viewController.startRecordingReplayKit()
                 }
                 case "StopRecording" :
                 DispatchQueue.main.async {
                     self.viewController.recordingSwitch.isOn = false
+                    self.viewController.stopRecordingReplayKit()
                 }
                 default:
+                    // need to add case for when recording is not in progress and message is sent?
                     self.viewController.recordEvent(stringFromByteArray ?? "")
             }
             
