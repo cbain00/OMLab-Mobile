@@ -42,7 +42,7 @@ class EyeTrackingNetworkService: ObservableObject {
             case .ready:
                 self.isReady = true
                 self.listening = true
-                print(self.listening)
+                print("Listener connection established? \(self.listening)")
                 print("Listener connected to port \(port)")
             case .failed:
                 // Announce that we are no longer able to listen

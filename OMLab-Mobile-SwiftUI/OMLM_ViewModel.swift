@@ -79,7 +79,7 @@ class HomeView_ViewModel: ObservableObject {
         }
     }
     
-    // MARK: FileList getters and setters
+    // MARK: FileList getters, setters, deleters
     
     func setFileList() {
         self.files = makeFileList()
@@ -129,7 +129,6 @@ class HomeView_ViewModel: ObservableObject {
 
     // returns size of contents of folder in KB
     func getFileFolderSize(fileFolderURL: URL) -> Int64 {
-        let fileManager = FileManager.default
         var totalSize: Int64 = 0
         
         do {
@@ -151,8 +150,6 @@ class HomeView_ViewModel: ObservableObject {
 
     func deleteFolder(_ file: String) {
         // Perform the deletion logic here
-        let fileManager = FileManager.default
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileURL = documentsURL.appendingPathComponent(file)
         
         do {
