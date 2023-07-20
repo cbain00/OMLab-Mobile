@@ -26,6 +26,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     var recordBool = false
     var outputURL: URL!
     
+    @State private var recording = false
     let defaultName = "file"
     
     var udpTriggered = false {
@@ -56,9 +57,43 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+        
+        // recording switch
+        let recordingSwitch = UISwitch()
+        recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
+        recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
+        view.addSubview(recordingSwitch)
+        NSLayoutConstraint.activate([
+            recordingSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
+        ])
+        
+        // recording button
+        let isRecording = Binding<Bool>(
+            get: { self.recording },
+            set: { newValue in
+                self.recording = newValue
+                print(self.recording)
+            }
+        )
+
+        let recordingButton = RecordButton(isRecording: $recording, startAction: {}, stopAction: {})
+        let hostingController = UIHostingController(rootView: recordingButton)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.backgroundColor = .clear
+        addChild(hostingController)
+        view.addSubview(hostingController.view)
+        hostingController.didMove(toParent: self)
+        NSLayoutConstraint.activate([
+            hostingController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            hostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            hostingController.view.widthAnchor.constraint(equalToConstant: 60),
+            hostingController.view.heightAnchor.constraint(equalToConstant: 60),
+        ])
                 
         // Set up sceneView properties
         self.sceneView = sceneView
+        self.recordingSwitch = recordingSwitch
         sceneView.delegate = self
         sceneView.session.delegate = self
         sceneView.automaticallyUpdatesLighting = true
@@ -122,6 +157,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         stopRecordingReplayKit()
     }
     
+    // start screen recording after button is pressed
     func startRecordingReplayKit() {
         recorder.startRecording { (error) in
             guard error == nil else {
@@ -352,3 +388,4 @@ NSLayoutConstraint.activate([
  //    }
 
  */
+

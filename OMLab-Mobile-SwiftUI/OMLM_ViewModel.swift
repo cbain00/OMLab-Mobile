@@ -216,6 +216,7 @@ class HomeView_ViewModel: ObservableObject {
     }
 
     func deleteFolder(_ file: String) {
+        // Perform the deletion logic here
         let fileURL = documentsURL.appendingPathComponent(file)
         
         do {
