@@ -160,3 +160,9 @@ class HomeView_ViewModel: ObservableObject {
         }
     }
 }
+
+class ViewController_ViewModel: ObservableObject {
+    
+    @Published var isRecording = false
+    
+}

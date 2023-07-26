@@ -47,7 +47,7 @@ struct HomeMenuView: View {
                 // Add other options as desired
                 
             } label: {
-                Image(systemName: "ellipsis")
+                Image(systemName: "ellipsis.circle")
                     .frame(width: 25, height: 15, alignment: .trailing)
             }
 

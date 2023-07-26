@@ -17,15 +17,13 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // MARK: Outlets
     var sceneView: ARSCNView!
     weak var recordingSwitch: UISwitch!
-    weak var recordingName: UITextField!
-    //weak var logTextView: UITextView!
-    var isRecordingSwitchOn = false
+    //weak var recordingName: UITextField!
     
+    var isRecordingSwitchOn = false
     let recorder = RPScreenRecorder.shared()
     var recordBool = false
     var outputURL: URL!
     
-    @State private var recording = false
     let defaultName = "file"
 
     // https://stackoverflow.com/questions/35006738/auto-scroll-for-uitextview-using-swift-ios-app
@@ -61,29 +59,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
         ])
         
-        // recording button
-        let isRecording = Binding<Bool>(
-            get: { self.recording },
-            set: { newValue in
-                self.recording = newValue
-                print(self.recording)
-            }
-        )
-
-        let recordingButton = RecordButton(isRecording: $recording, startAction: {}, stopAction: {})
-        let hostingController = UIHostingController(rootView: recordingButton)
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        hostingController.view.backgroundColor = .clear
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
-        NSLayoutConstraint.activate([
-            hostingController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            hostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            hostingController.view.widthAnchor.constraint(equalToConstant: 60),
-            hostingController.view.heightAnchor.constraint(equalToConstant: 60),
-        ])
-
         // Set up sceneView properties
         self.sceneView = sceneView
         self.recordingSwitch = recordingSwitch
@@ -149,11 +124,9 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // Running AR Session
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
         let faceAnchor = anchors[0] as! ARFaceAnchor
-        eyeTrackingRecording.RecordData(recordingSwitchIsOn: recordingSwitch.isOn, session, faceAnchor, defaultName)
-        //self.displayFileNamer()
+        eyeTrackingRecording.RecordData(recordingSwitchIsOn: isRecordingSwitchOn, session, faceAnchor, defaultName)
     }
     
-    // start screen recording after button is pressed
     func startRecordingReplayKit() {
         recorder.startRecording { (error) in
             guard error == nil else {
@@ -163,7 +136,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         }
     }
     
-    // stop screen recording after button is pressed
     func stopRecordingReplayKit() {
         // if recording, stop recording, else don't do anything
         // this is to avoid permission being presented twice
@@ -199,59 +171,11 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             print("File saved successfully as: \(videoRecorded)")
         }
     }
-
-    func displayFileNamer() {
-        if isRecordingSwitchOn == recordingSwitch.isOn {
-            // Recording switch state hasn't changed, so return
-            return
-        }
-        
-        isRecordingSwitchOn = recordingSwitch.isOn
-
-        let alertController = UIAlertController(title: "File Name", message: "Enter a name for the recording", preferredStyle: .alert)
-
-        alertController.addTextField { textField in
-            textField.placeholder = "Enter Recording Name"
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            self.resetTracking()
-        }
-
-        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
-            guard let fileName = alertController.textFields?.first?.text else {
-                self.resetTracking()
-                return
-            }
-
-            self.renameFile(fileName: self.eyeTrackingRecording.folderName, newFileName: fileName)
-            self.resetTracking()
-        }
-
-        alertController.addAction(cancelAction)
-        alertController.addAction(saveAction)
-
-        present(alertController, animated: true, completion: nil)
-    }
-
-    func renameFile(fileName: String, newFileName: String) {
-        let fileManager = FileManager.default
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = documentsURL.appendingPathComponent(fileName)
-        let newFileURL = documentsURL.appendingPathComponent(newFileName)
-        
-        do {
-            try fileManager.moveItem(at: fileURL, to: newFileURL)
-            print("File named successfully.")
-        } catch {
-            print("Error renaming file: \(error.localizedDescription)")
-        }
-    }
     
     // record event message being sent, also create new file if needed
     func recordEvent(_ message: String) {
         DispatchQueue.main.async {
-            self.eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: self.recordingSwitch.isOn, message, self.defaultName)
+            self.eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: self.isRecordingSwitchOn, message, self.defaultName)
         }
     }
     
@@ -339,139 +263,7 @@ extension EyeTrackingViewController: ARSCNViewDelegate {
     }
 }
 
-// https://gist.github.com/joshgalvan/29b7ede649da432a14c50e97e59a2147
-struct RecordButton: View {
-    @Binding var isRecording: Bool
-    let startAction: () -> Void
-    let stopAction: () -> Void
-    let buttonColor: Color
-    let borderColor: Color
-    let animation: Animation
-    
-    init(isRecording: Binding<Bool>, animation: Animation = .easeInOut(duration: 0.25), buttonColor: Color = .red, borderColor: Color = .white, startAction: @escaping () -> Void, stopAction: @escaping () -> Void) {
-        self._isRecording = isRecording
-        self.animation = animation
-        self.buttonColor = buttonColor
-        self.borderColor = borderColor
-        self.startAction = startAction
-        self.stopAction = stopAction
-    }
-    
-    var body: some View {
-        ZStack {
-            GeometryReader { geometry in
-                let minDimension = min(geometry.size.width, geometry.size.height)
-                
-                Button {
-                    if isRecording {
-                        deactivate()
-                    } else {
-                        activate()
-                    }
-                } label: {
-                    RecordButtonShape(isRecording: isRecording)
-                        .fill(buttonColor)
-                }
-                .buttonStyle(PlainButtonStyle())
 
-                Circle()
-                    .strokeBorder(lineWidth: minDimension * 0.05)
-                    .foregroundColor(borderColor)
-            }
-        }
-        .background(Color.clear)
-    }
-    
-    private func activate() {
-        print("in activate")
-        startAction()
-        withAnimation(animation) {
-            isRecording = true
-        }
-    }
-    
-    private func deactivate() {
-        print("in deactivate")
-        stopAction()
-        withAnimation(animation) {
-            isRecording = false
-        }
-    }
-
-}
-
-struct RecordButtonShape: Shape {
-    var shapeRadius: CGFloat
-    var distanceFromCardinal: CGFloat
-    var b: CGFloat
-    var c: CGFloat
-    
-    init(isRecording: Bool) {
-        self.shapeRadius = isRecording ? 1.0 : 0.0
-        self.distanceFromCardinal = isRecording ? 1.0 : 0.0
-        self.b = isRecording ? 0.90 : 0.55
-        self.c = isRecording ? 1.00 : 0.99
-    }
-    
-    var animatableData: AnimatablePair<Double, AnimatablePair<Double, AnimatablePair<Double, Double>>> {
-        get {
-            AnimatablePair(Double(shapeRadius),
-                           AnimatablePair(Double(distanceFromCardinal),
-                                          AnimatablePair(Double(b), Double(c))))
-        }
-        set {
-            shapeRadius = Double(newValue.first)
-            distanceFromCardinal = Double(newValue.second.first)
-            b = Double(newValue.second.second.first)
-            c = Double(newValue.second.second.second)
-        }
-    }
-    
-    func path(in rect: CGRect) -> Path {
-        let minDimension = min(rect.maxX, rect.maxY)
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = (minDimension / 2 * 0.82) - (shapeRadius * minDimension * 0.22)
-        let movementFactor = 0.65
-        
-        let rightTop = CGPoint(x: center.x + radius, y: center.y - radius * movementFactor * distanceFromCardinal)
-        let rightBottom = CGPoint(x: center.x + radius, y: center.y + radius * movementFactor * distanceFromCardinal)
-        
-        let topRight = CGPoint(x: center.x + radius * movementFactor * distanceFromCardinal, y: center.y - radius)
-        let topLeft = CGPoint(x: center.x - radius * movementFactor * distanceFromCardinal, y: center.y - radius)
-        
-        let leftTop = CGPoint(x: center.x - radius, y: center.y - radius * movementFactor * distanceFromCardinal)
-        let leftBottom = CGPoint(x: center.x - radius, y: center.y + radius * movementFactor * distanceFromCardinal)
-        
-        let bottomRight = CGPoint(x: center.x + radius * movementFactor * distanceFromCardinal, y: center.y + radius)
-        let bottomLeft = CGPoint(x: center.x - radius * movementFactor * distanceFromCardinal, y: center.y + radius)
-        
-        let topRightControl1 = CGPoint(x: center.x + radius * c, y: center.y - radius * b)
-        let topRightControl2 = CGPoint(x: center.x + radius * b, y: center.y - radius * c)
-        
-        let topLeftControl1 = CGPoint(x: center.x - radius * b, y: center.y - radius * c)
-        let topLeftControl2 = CGPoint(x: center.x - radius * c, y: center.y - radius * b)
-        
-        let bottomLeftControl1 = CGPoint(x: center.x - radius * c, y: center.y + radius * b)
-        let bottomLeftControl2 = CGPoint(x: center.x - radius * b, y: center.y + radius * c)
-        
-        let bottomRightControl1 = CGPoint(x: center.x + radius * b, y: center.y + radius * c)
-        let bottomRightControl2 = CGPoint(x: center.x + radius * c, y: center.y + radius * b)
-    
-        var path = Path()
-        
-        path.move(to: rightTop)
-        path.addCurve(to: topRight, control1: topRightControl1, control2: topRightControl2)
-        path.addLine(to: topLeft)
-        path.addCurve(to: leftTop, control1: topLeftControl1, control2: topLeftControl2)
-        path.addLine(to: leftBottom)
-        path.addCurve(to: bottomLeft, control1: bottomLeftControl1, control2: bottomLeftControl2)
-        path.addLine(to: bottomRight)
-        path.addCurve(to: rightBottom, control1: bottomRightControl1, control2: bottomRightControl2)
-        path.addLine(to: rightTop)
-
-        return path
-    }
-}
 
 /*
 let recordingName = UITextField()
@@ -489,5 +281,50 @@ NSLayoutConstraint.activate([
     recordingName.widthAnchor.constraint(equalToConstant: 200),
     recordingName.heightAnchor.constraint(equalToConstant: 30)
 ])
- */
+ 
+ func displayFileNamer() {
+     if isRecordingSwitchOn {
+         // Recording switch state hasn't changed, so return
+         return
+     }
+     
+     let alertController = UIAlertController(title: "File Name", message: "Enter a name for the recording", preferredStyle: .alert)
 
+     alertController.addTextField { textField in
+         textField.placeholder = "Enter Recording Name"
+     }
+
+     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+         self.resetTracking()
+     }
+
+     let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+         guard let fileName = alertController.textFields?.first?.text else {
+             self.resetTracking()
+             return
+         }
+
+         self.renameFile(fileName: self.eyeTrackingRecording.folderName, newFileName: fileName)
+         self.resetTracking()
+     }
+
+     alertController.addAction(cancelAction)
+     alertController.addAction(saveAction)
+
+     present(alertController, animated: true, completion: nil)
+ }
+ 
+ func renameFile(fileName: String, newFileName: String) {
+     let fileManager = FileManager.default
+     let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+     let fileURL = documentsURL.appendingPathComponent(fileName)
+     let newFileURL = documentsURL.appendingPathComponent(newFileName)
+     
+     do {
+         try fileManager.moveItem(at: fileURL, to: newFileURL)
+         print("File named successfully.")
+     } catch {
+         print("Error renaming file: \(error.localizedDescription)")
+     }
+ }
+ */
