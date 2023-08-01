@@ -29,26 +29,9 @@ struct CameraView: View {
 }
 
 
-struct EyeTrackingView: UIViewControllerRepresentable {
+final class EyeTrackingView: UIViewControllerRepresentable {
     @ObservedObject var viewModel: ViewController_ViewModel
     
-    func makeCoordinator() -> Coordinator {
-        return Coordinator()
-    }
-        
-    func updateUIViewController(_ uiViewController: EyeTrackingViewController, context: Context) {
-        if viewModel.isRecording == true {
-            context.coordinator.startRecording()
-        } else {
-            context.coordinator.stopRecording()
-        }
-    }
-    
-    func makeUIViewController(context: Context) -> EyeTrackingViewController {
-        let eyetrackingvc = context.coordinator.eyeTrackingViewController
-        return eyetrackingvc
-    }
-
     class Coordinator: NSObject, EyeTrackingViewControllerDelegate {
         var eyeTrackingViewController = EyeTrackingViewController()
         
@@ -63,6 +46,23 @@ struct EyeTrackingView: UIViewControllerRepresentable {
             eyeTrackingViewController.isRecordingSwitchOn = false
             eyeTrackingViewController.stopRecordingReplayKit()
         }
+    }
+            
+    func updateUIViewController(_ uiViewController: EyeTrackingViewController, context: Context) {
+        if viewModel.isRecording == true {
+            context.coordinator.startRecording()
+        } else {
+            context.coordinator.stopRecording()
+        }
+    }
+    
+    func makeUIViewController(context: Context) -> EyeTrackingViewController {
+        let eyetrackingvc = context.coordinator.eyeTrackingViewController
+        return eyetrackingvc
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        return Coordinator()
     }
 }
 
