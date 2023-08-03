@@ -48,7 +48,8 @@ struct HomeMenuView: View {
                 
             } label: {
                 Image(systemName: "ellipsis.circle")
-                    .frame(width: 25, height: 15, alignment: .trailing)
+                    .frame(width: 25, height: 25, alignment: .leading)
+                    .font(.system(size: 20))
             }
 
             Text("Home")

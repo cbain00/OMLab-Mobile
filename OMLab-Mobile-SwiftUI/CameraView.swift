@@ -45,11 +45,9 @@ struct EyeTrackingView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: EyeTrackingViewController, context: Context) {
         // Update EyeTrackingViewController based on changes in isRecording
         if isRecording {
-            uiViewController.isRecordingSwitchOn = true
-            uiViewController.startRecordingReplayKit()
+            uiViewController.startRecording()
         } else {
-            uiViewController.isRecordingSwitchOn = false
-            uiViewController.stopRecordingReplayKit()
+            uiViewController.stopRecording()
         }
     }
     

@@ -20,7 +20,8 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     //weak var recordingSwitch: UISwitch!
     //weak var recordingName: UITextField!
     
-    var isRecordingSwitchOn = false
+    // continued recording state of app
+    var isRecording = false
     let recorder = RPScreenRecorder.shared()
     var recordBool = false
     var outputURL: URL!
@@ -55,20 +56,9 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
-        
-        // recording switch
-        let recordingSwitch = UISwitch()
-        recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
-        //recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
-        view.addSubview(recordingSwitch)
-        NSLayoutConstraint.activate([
-            recordingSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
-        ])
-        
+                
         // Set up sceneView properties
         self.sceneView = sceneView
-        //self.recordingSwitch = recordingSwitch
         sceneView.delegate = self
         sceneView.session.delegate = self
         sceneView.automaticallyUpdatesLighting = true
@@ -86,18 +76,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         return true
     }
     
-//    @objc func buttonOnClick(_ sender: UISwitch) {
-//
-//        if sender.isOn {
-//            startRecordingReplayKit()
-//        }
-//
-//        else {
-//            stopRecordingReplayKit()
-//        }
-//        print("button pressed")
-//    }
-
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -131,7 +109,17 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // Running AR Session
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
         let faceAnchor = anchors[0] as! ARFaceAnchor
-        eyeTrackingRecording.RecordData(recordingSwitchIsOn: isRecordingSwitchOn, session, faceAnchor, defaultName)
+        eyeTrackingRecording.RecordData(recordingSwitchIsOn: isRecording, session, faceAnchor, defaultName)
+    }
+    
+    func startRecording() {
+        isRecording = true
+        startRecordingReplayKit()
+    }
+    
+    func stopRecording() {
+        isRecording = false
+        stopRecordingReplayKit()
     }
     
     func startRecordingReplayKit() {
@@ -182,7 +170,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // record event message being sent, also create new file if needed
     func recordEvent(_ message: String) {
         DispatchQueue.main.async {
-            self.eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: self.isRecordingSwitchOn, message, self.defaultName)
+            self.eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: self.isRecording, message, self.defaultName)
         }
     }
     
@@ -338,4 +326,29 @@ NSLayoutConstraint.activate([
          print("Error renaming file: \(error.localizedDescription)")
      }
  }
+ 
+ //        // recording switch
+ //        let recordingSwitch = UISwitch()
+ //        recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
+ //        //recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
+ //        view.addSubview(recordingSwitch)
+ //        NSLayoutConstraint.activate([
+ //            recordingSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+ //            recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
+ //        ])
+ 
+ //    self.recordingSwitch = recordingSwitch
+
+ //    @objc func buttonOnClick(_ sender: UISwitch) {
+ //
+ //        if sender.isOn {
+ //            startRecordingReplayKit()
+ //        }
+ //
+ //        else {
+ //            stopRecordingReplayKit()
+ //        }
+ //        print("button pressed")
+ //    }
+
  */
