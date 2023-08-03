@@ -8,18 +8,24 @@
 import SwiftUI
 
 struct CameraView: View {
-    @StateObject var viewModel = ViewController_ViewModel()
-    @State var buttonIsRecording = false
+    // The app's recording state is defined by the variable `isRecording`.
+
+    // The `@State` attribute designates that this variable is the source of truth for the recording state.
+
+    // To make other structs or classes interact with and respond to this state, they need to accept `isRecording` as a `@Binding<Bool>`.
+
+    // Using `@Binding` preserves the state across different components, ensuring that they all work together in sync.
+    @State var isRecording = false
     
     var body: some View {
         ZStack {
-            EyeTrackingView(viewModel: viewModel)
+            EyeTrackingView(isRecording: $isRecording)
             VStack {
                 Spacer()
                 RecordButton(
-                    isRecording: $buttonIsRecording,
-                    startAction: { viewModel.isRecording = true },
-                    stopAction: { viewModel.isRecording = false }
+                    isRecording: $isRecording,
+                    startAction: {},
+                    stopAction: {}
                 )
                     .frame(width: 80, height: 80)
                     .padding(.bottom, 20)
@@ -29,46 +35,40 @@ struct CameraView: View {
 }
 
 
-final class EyeTrackingView: UIViewControllerRepresentable {
-    @ObservedObject var viewModel: ViewController_ViewModel
+struct EyeTrackingView: UIViewControllerRepresentable {
+    @Binding var isRecording: Bool
     
-    class Coordinator: NSObject, EyeTrackingViewControllerDelegate {
-        var eyeTrackingViewController = EyeTrackingViewController()
-        
-        func startRecording() {
-            print("coordinator: start recording")
-            eyeTrackingViewController.isRecordingSwitchOn = true
-            eyeTrackingViewController.startRecordingReplayKit()
-        }
-        
-        func stopRecording() {
-            print("coordinator: stop recording")
-            eyeTrackingViewController.isRecordingSwitchOn = false
-            eyeTrackingViewController.stopRecordingReplayKit()
-        }
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(isRecording: $isRecording)
     }
-            
+    
     func updateUIViewController(_ uiViewController: EyeTrackingViewController, context: Context) {
-        if viewModel.isRecording == true {
-            context.coordinator.startRecording()
+        // Update EyeTrackingViewController based on changes in isRecording
+        if isRecording {
+            uiViewController.isRecordingSwitchOn = true
+            uiViewController.startRecordingReplayKit()
         } else {
-            context.coordinator.stopRecording()
+            uiViewController.isRecordingSwitchOn = false
+            uiViewController.stopRecordingReplayKit()
         }
     }
     
     func makeUIViewController(context: Context) -> EyeTrackingViewController {
-        let eyetrackingvc = context.coordinator.eyeTrackingViewController
+        let eyetrackingvc = EyeTrackingViewController()
+        eyetrackingvc.delegate = context.coordinator
         return eyetrackingvc
     }
     
-    func makeCoordinator() -> Coordinator {
-        return Coordinator()
-    }
-}
+    class Coordinator: NSObject, EyeTrackingViewControllerDelegate {
+        @Binding var isRecording: Bool
+        init(isRecording: Binding<Bool>) {
+            _isRecording = isRecording
+        }
 
-protocol EyeTrackingViewControllerDelegate: AnyObject {
-    func startRecording()
-    func stopRecording()
+        func udpTriggeredDidChange(_ value: Bool) {
+            isRecording = value
+        }
+    }
 }
 
 
@@ -129,6 +129,7 @@ struct RecordButton: View {
         }
     }
 }
+
 
 struct RecordButtonShape: Shape {
     var shapeRadius: CGFloat

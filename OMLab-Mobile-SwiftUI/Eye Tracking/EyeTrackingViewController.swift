@@ -16,7 +16,8 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     
     // MARK: Outlets
     var sceneView: ARSCNView!
-    weak var recordingSwitch: UISwitch!
+    weak var delegate: EyeTrackingViewControllerDelegate?
+    //weak var recordingSwitch: UISwitch!
     //weak var recordingName: UITextField!
     
     var isRecordingSwitchOn = false
@@ -25,6 +26,12 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     var outputURL: URL!
     
     let defaultName = "file"
+    
+    var udpTriggered = false {
+        didSet {
+            delegate?.udpTriggeredDidChange(udpTriggered)
+        }
+    }
 
     // https://stackoverflow.com/questions/35006738/auto-scroll-for-uitextview-using-swift-ios-app
     // MARK: Properties
@@ -52,7 +59,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         // recording switch
         let recordingSwitch = UISwitch()
         recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
-        recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
+        //recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
         view.addSubview(recordingSwitch)
         NSLayoutConstraint.activate([
             recordingSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
@@ -61,7 +68,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         
         // Set up sceneView properties
         self.sceneView = sceneView
-        self.recordingSwitch = recordingSwitch
+        //self.recordingSwitch = recordingSwitch
         sceneView.delegate = self
         sceneView.session.delegate = self
         sceneView.automaticallyUpdatesLighting = true
@@ -79,17 +86,17 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         return true
     }
     
-    @objc func buttonOnClick(_ sender: UISwitch) {
-        
-        if sender.isOn {
-            startRecordingReplayKit()
-        }
-        
-        else {
-            stopRecordingReplayKit()
-        }
-        print("button pressed")
-    }
+//    @objc func buttonOnClick(_ sender: UISwitch) {
+//
+//        if sender.isOn {
+//            startRecordingReplayKit()
+//        }
+//
+//        else {
+//            stopRecordingReplayKit()
+//        }
+//        print("button pressed")
+//    }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -261,6 +268,10 @@ extension EyeTrackingViewController: ARSCNViewDelegate {
         
         faceAnchorsAndContentControllers[faceAnchor] = nil
     }
+}
+
+protocol EyeTrackingViewControllerDelegate: AnyObject {
+    func udpTriggeredDidChange(_ value: Bool)
 }
 
 
