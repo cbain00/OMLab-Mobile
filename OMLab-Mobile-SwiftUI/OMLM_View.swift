@@ -10,6 +10,7 @@ import SwiftUI
 struct Dashboard: View {
     // Set the initial selected tab to 1 (index of CameraView)
     @State private var selectedTab = 1
+    @StateObject var settings_ViewModel = Settings_ViewModel()
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -18,15 +19,14 @@ struct Dashboard: View {
                     Image(systemName: "house")
                 }
             
-            CameraView()
-                // best option without hiding tabs
+            CameraView(viewModel: settings_ViewModel)
                 .edgesIgnoringSafeArea(.top)
                 .tabItem {
                     Image(systemName: "camera")
                 }
                 .tag(1)
             
-            SettingsView()
+            SettingsView(viewModel: settings_ViewModel)
                 .tabItem {
                     Image(systemName: "gear")
                 }

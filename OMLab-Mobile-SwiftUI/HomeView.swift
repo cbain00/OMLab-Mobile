@@ -30,6 +30,7 @@ struct HomeView: View {
     }
 }
 
+
 struct HomeMenuView: View {
     @ObservedObject var viewModel: HomeView_ViewModel
     @State private var showReportView = false
@@ -142,41 +143,33 @@ struct SortByView: View {
 
 struct SearchBarView: View {
     @ObservedObject var viewModel: HomeView_ViewModel
-    @State private var searchText = ""
+    @State private var searchText: String = ""
     @State private var isSearching = true
     
     var body: some View {
         VStack {
-            Text("Search Files")
-                .font(.title3)
-                .fontWeight(.medium)
-
-            SearchBar(text: $searchText)
-                .padding(.horizontal)
-            
+            SearchBar(text: $searchText, placeholder: "Search Files...")
             List {
-                // Check if there are any recent files matching the search criteria
                 if !viewModel.recentFiles.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }).isEmpty {
-                    // If so, show them in a section with a header
                     Section(header: Text("Recently Viewed")) {
-                        // Iterate over the recent files that match the search criteria
-                        ForEach(viewModel.recentFiles.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) })) { file in
+                        ForEach(viewModel.recentFiles.filter {
+                            searchText.isEmpty ? true : $0.name.lowercased().contains(searchText.lowercased())
+                        }, id: \.self) { file in
                             NavigationLink(destination: FileDetailView(file: file, viewModel: viewModel)) {
                                 Text(file.name)
                             }
                         }
                     }
                 }
-
-                // Check if there are any files matching the search criteria
+                
                 if viewModel.files.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }).isEmpty {
-                    // If not, show a message indicating that no files were found
                     Text("No files found")
+                        .foregroundColor(.gray)
                 } else {
-                    // Otherwise, show all files that match the search criteria in a section with a header
                     Section(header: Text("All Files")) {
-                        // Iterate over the files that match the search criteria
-                        ForEach(viewModel.files.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) })) { file in
+                        ForEach(viewModel.files.filter {
+                            searchText.isEmpty ? true : $0.name.lowercased().contains(searchText.lowercased())
+                        }.sorted(by: viewModel.sortFunction), id: \.self) { file in
                             NavigationLink(destination: FileDetailView(file: file, viewModel: viewModel)) {
                                 Text(file.name)
                             }
@@ -185,31 +178,118 @@ struct SearchBarView: View {
                 }
             }
         }
+        .navigationTitle(Text("Search Files"))
     }
 }
 
-
-struct SearchBar: View {
+struct SearchBar: UIViewRepresentable {
     @Binding var text: String
+    var placeholder: String
     
-    var body: some View {
-        HStack {
-            Spacer()
-            TextField("Search", text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(maxWidth: 800)
-            
-            Button(action: {
-                text = ""
-            }, label: {
-                Image(systemName: "xmark.circle.fill")
-            })
-            .padding(.horizontal, 4)
-            .opacity(text == "" ? 0 : 1)
+    class Coordinator: NSObject, UISearchBarDelegate {
+        @Binding var text: String
+        init(text: Binding<String>) {
+            _text = text
         }
-        .padding(.horizontal)
+        
+        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            text = searchText
+        }
+        
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+        }
+    }
+    
+    func makeCoordinator() -> SearchBar.Coordinator {
+        return Coordinator(text: $text)
+    }
+    
+    func makeUIView(context: UIViewRepresentableContext<SearchBar>) -> UISearchBar {
+        let searchBar = UISearchBar(frame: .zero)
+        searchBar.delegate = context.coordinator
+        searchBar.placeholder = placeholder
+        searchBar.searchBarStyle = .minimal
+        searchBar.autocapitalizationType = .none
+        return searchBar
+    }
+    
+    func updateUIView(_ uiView: UISearchBar, context: Context) {
+        uiView.text = text
     }
 }
+
+
+//    var body: some View {
+//        VStack {
+//            Text("Search Files")
+//                .font(.title3)
+//                .fontWeight(.medium)
+//
+//            SearchBar(text: $searchText)
+//                .padding(.horizontal)
+//
+//            List {
+//                // Check if there are any recent files matching the search criteria
+//                if !viewModel.recentFiles.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }).isEmpty {
+//                    // If so, show them in a section with a header
+//                    Section(header: Text("Recently Viewed")) {
+//                        // Iterate over the recent files that match the search criteria
+//                        ForEach(
+//                            viewModel.recentFiles
+//                                .filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }))
+//                        { file in
+//                            NavigationLink(destination: FileDetailView(file: file, viewModel: viewModel)) {
+//                                Text(file.name)
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                // Check if there are any files matching the search criteria
+//                if viewModel.files.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }).isEmpty {
+//                    // If not, show a message indicating that no files were found
+//                    Text("No files found")
+//                } else {
+//                    // Otherwise, show all files that match the search criteria in a section with a header
+//                    Section(header: Text("All Files")) {
+//                        // Iterate over the files that match the search criteria
+//                        ForEach(
+//                            viewModel.files
+//                                .filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) })
+//                                .sorted(by: viewModel.sortFunction))
+//                        { file in
+//                            NavigationLink(destination: FileDetailView(file: file, viewModel: viewModel)) {
+//                                Text(file.name)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+//struct SearchBar: View {
+//    @Binding var text: String
+//
+//    var body: some View {
+//        HStack {
+//            Spacer()
+//            TextField("Search", text: $text)
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+//                .frame(maxWidth: 800)
+//
+//            Button(action: {
+//                text = ""
+//            }, label: {
+//                Image(systemName: "xmark.circle.fill")
+//            })
+//            .padding(.horizontal, 4)
+//            .opacity(text == "" ? 0 : 1)
+//        }
+//        .padding(.horizontal)
+//    }
+//}
 
 /*
 struct SortingView: View {

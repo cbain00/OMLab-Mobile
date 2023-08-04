@@ -231,6 +231,6 @@ class HomeView_ViewModel: ObservableObject {
 class Settings_ViewModel: ObservableObject {
     @Published var participantID: String = ""
     @Published var sessionName: String = ""
-    @Published var allowUDPConnections: Bool = false
-    @Published var allowScreenRecording: Bool = false
+    @Published var allowUDPConnections: Bool = true
+    @Published var allowScreenRecording: Bool = true
 }

@@ -16,10 +16,11 @@ struct CameraView: View {
 
     // Using `@Binding` preserves the state across different components, ensuring that they all work together in sync.
     @State var isRecording = false
+    @ObservedObject var viewModel: Settings_ViewModel
     
     var body: some View {
         ZStack {
-            EyeTrackingView(isRecording: $isRecording)
+            EyeTrackingView(isRecording: $isRecording, settings: viewModel)
             VStack {
                 Spacer()
                 RecordButton(
@@ -37,12 +38,17 @@ struct CameraView: View {
 
 struct EyeTrackingView: UIViewControllerRepresentable {
     @Binding var isRecording: Bool
+    @ObservedObject var settings: Settings_ViewModel
     
     func makeCoordinator() -> Coordinator {
         return Coordinator(isRecording: $isRecording)
     }
     
     func updateUIViewController(_ uiViewController: EyeTrackingViewController, context: Context) {
+        // update settings in view controller if needed
+        uiViewController.allowScreenRecording = settings.allowScreenRecording
+        uiViewController.allowUDPConnections = settings.allowUDPConnections
+        
         // Update EyeTrackingViewController based on changes in isRecording
         if isRecording {
             uiViewController.startRecording()
@@ -54,6 +60,8 @@ struct EyeTrackingView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> EyeTrackingViewController {
         let eyetrackingvc = EyeTrackingViewController()
         eyetrackingvc.delegate = context.coordinator
+        eyetrackingvc.allowScreenRecording = settings.allowScreenRecording
+        eyetrackingvc.allowUDPConnections = settings.allowUDPConnections
         return eyetrackingvc
     }
     

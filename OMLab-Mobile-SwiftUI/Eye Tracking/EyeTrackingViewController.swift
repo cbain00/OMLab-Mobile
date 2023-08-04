@@ -17,11 +17,15 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // MARK: Outlets
     var sceneView: ARSCNView!
     weak var delegate: EyeTrackingViewControllerDelegate?
-    //weak var recordingSwitch: UISwitch!
-    //weak var recordingName: UITextField!
     
     // continued recording state of app
     var isRecording = false
+    
+    // passing through variables of settings
+    var allowUDPConnections = true
+    var allowScreenRecording = true
+    
+    // recorded initializing
     let recorder = RPScreenRecorder.shared()
     var recordBool = false
     var outputURL: URL!
@@ -70,12 +74,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         eyeTrackingNetworkService = EyeTrackingNetworkService(on:8000, self)
     }
 
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder() // Dismiss the keyboard
-        return true
-    }
-    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -123,10 +121,12 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     }
     
     func startRecordingReplayKit() {
-        recorder.startRecording { (error) in
-            guard error == nil else {
-                print("Failed to start recording")
-                return
+        if allowScreenRecording {
+            recorder.startRecording { (error) in
+                guard error == nil else {
+                    print("Failed to start recording")
+                    return
+                }
             }
         }
     }
@@ -326,7 +326,9 @@ NSLayoutConstraint.activate([
          print("Error renaming file: \(error.localizedDescription)")
      }
  }
- 
+ //         weak var recordingSwitch: UISwitch!
+ //         weak var recordingName: UITextField!
+
  //        // recording switch
  //        let recordingSwitch = UISwitch()
  //        recordingSwitch.translatesAutoresizingMaskIntoConstraints = false

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @StateObject private var viewModel = Settings_ViewModel()
+    @ObservedObject var viewModel: Settings_ViewModel
     @State private var isEditingParticipantID = false
     @State private var isEditingSessionName = false
     @State private var newParticipantID = ""
@@ -29,7 +29,6 @@ struct SettingsView: View {
             Text("Settings")
                 .font(.title)
                 .fontWeight(.bold)
-
             Spacer()
         }
     }
@@ -42,16 +41,13 @@ struct SettingsView: View {
             }
             
             Section(header: Text("Permissions")) {
-                Toggle(isOn: $viewModel.allowUDPConnections) {
-                    Text("Allow UDP Connections")
-                }
-                
-                Toggle(isOn: $viewModel.allowScreenRecording) {
-                    Text("Record Tracking Sessions")
-                }
+                allowUDPConnectionsView
+                allowScreenRecordingView
             }
         }
         .listStyle(.insetGrouped)
+        .padding(.horizontal, -20)
+        
     }
     
     private var participantIDView: some View {
@@ -105,7 +101,30 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) { }
             }
     }
-
+    
+    private var allowUDPConnectionsView: some View {
+        HStack {
+            Image(systemName: "wifi.square.fill")
+                .font(.system(size: 30))
+                .foregroundColor(.blue)
+            
+            Toggle(isOn: $viewModel.allowUDPConnections) {
+                Text("Allow Wireless Connections")
+            }
+        }
+    }
+    
+    private var allowScreenRecordingView: some View {
+        HStack {
+            Image(systemName: "video.square.fill")
+                .font(.system(size: 30))
+                .foregroundColor(.green)
+            
+            Toggle(isOn: $viewModel.allowScreenRecording) {
+                Text("Record Tracking Sessions")
+            }
+        }
+    }
 
     func submitID(newParticipantID: Binding<String>) {
         viewModel.participantID = newParticipantID.wrappedValue
@@ -119,8 +138,7 @@ struct SettingsView: View {
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView()
+        let viewModel = Settings_ViewModel()
+        SettingsView(viewModel: viewModel)
     }
 }
-
-
