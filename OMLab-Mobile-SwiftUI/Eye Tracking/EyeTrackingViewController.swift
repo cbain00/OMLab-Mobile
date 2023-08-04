@@ -26,7 +26,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     var recordBool = false
     var outputURL: URL!
     
-    @State private var recording = false
     let defaultName = "file"
     
     var udpTriggered = false {
@@ -56,29 +55,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             sceneView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-                
-        // recording button
-        let isRecording = Binding<Bool>(
-            get: { self.recording },
-            set: { newValue in
-                self.recording = newValue
-                print(self.recording)
-            }
-        )
-
-        let recordingButton = RecordButton(isRecording: $recording, startAction: {}, stopAction: {})
-        let hostingController = UIHostingController(rootView: recordingButton)
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        hostingController.view.backgroundColor = .clear
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
-        NSLayoutConstraint.activate([
-            hostingController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            hostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            hostingController.view.widthAnchor.constraint(equalToConstant: 60),
-            hostingController.view.heightAnchor.constraint(equalToConstant: 60),
         ])
                 
         // Set up sceneView properties
@@ -146,7 +122,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         stopRecordingReplayKit()
     }
     
-    // start screen recording after button is pressed
     func startRecordingReplayKit() {
         recorder.startRecording { (error) in
             guard error == nil else {
@@ -377,4 +352,3 @@ NSLayoutConstraint.activate([
  //    }
 
  */
-
