@@ -8,60 +8,119 @@
 import SwiftUI
 
 struct SettingsView: View {
-    let settings: [(label: String, items: [Setting<Text>])] = [
-        ("General", [
-            Setting(name: "Notifications", icon: "bell", action: {
-                NavigationLink("Notifications", destination: Text("Notifications View"))
-            }),
-            Setting(name: "UDP Connection", icon: "wifi", action: {
-                NavigationLink("UDP Connection", destination: Text("UDP Connection View"))
-            })
-        ]),
-        ("Security", [
-            Setting(name: "Privacy Center", icon: "lock", action: {
-                NavigationLink("Privacy Center", destination: Text("Privacy Center View"))
-            }),
-            Setting(name: "Two-Factor Authentication", icon: "key", action: {
-                NavigationLink("Two-Factor Authentication", destination: Text("Two-Factor Auth View"))
-            })
-        ]),
-        ("Account", [
-            Setting(name: "Profile", icon: "person", action: {
-                NavigationLink("Profile", destination: Text("Profile View"))
-            })
-        ])
-    ]
+    @StateObject private var viewModel = Settings_ViewModel()
+    @State private var isEditingParticipantID = false
+    @State private var isEditingSessionName = false
+    @State private var newParticipantID = ""
+    @State private var newSessionName = ""
     
     var body: some View {
-        VStack {
+        NavigationView {
+            VStack {
+                header
+                settingsList
+            }
+            .padding()
+        }
+    }
+    
+    private var header: some View {
+        HStack {
             Text("Settings")
                 .font(.title)
                 .fontWeight(.bold)
-                .frame(maxWidth: .infinity)
-                .padding()
 
-            List {
-                ForEach(settings, id: \.label) { section in
-                    Section(header: Text(section.label)) {
-                        ForEach(section.items) { setting in
-                            HStack {
-                                Image(systemName: setting.icon)
-                                Text(setting.name)
-                                Spacer()
-                                setting.action()
-                            }
-                        }
-                    }
+            Spacer()
+        }
+    }
+    
+    private var settingsList: some View {
+        List {
+            Section(header: Text("General")) {
+                participantIDView
+                sessionNameView
+            }
+            
+            Section(header: Text("Permissions")) {
+                Toggle(isOn: $viewModel.allowUDPConnections) {
+                    Text("Allow UDP Connections")
+                }
+                
+                Toggle(isOn: $viewModel.allowScreenRecording) {
+                    Text("Record Tracking Sessions")
                 }
             }
         }
+        .listStyle(.insetGrouped)
+    }
+    
+    private var participantIDView: some View {
+        NavigationLink(
+            destination: Text(""),
+            isActive: $isEditingParticipantID,
+            label: {
+                HStack {
+                    Text("Participant ID")
+                    Spacer()
+                    Text(viewModel.participantID.isEmpty ? "N/A" : viewModel.participantID)
+                        .foregroundColor(.gray)
+                        .padding(.trailing, 6)
+                }
+            })
+            .onTapGesture {
+                isEditingParticipantID.toggle()
+            }
+            .alert("Participant ID", isPresented: $isEditingParticipantID) {
+                TextField("Enter participant ID", text: $newParticipantID)
+                    .textInputAutocapitalization(.never)
+                Button("Ok") {
+                    submitID(newParticipantID: $newParticipantID)
+                }
+                Button("Cancel", role: .cancel) { }
+            }
+    }
+    
+    private var sessionNameView: some View {
+        NavigationLink(
+            destination: Text(""),
+            isActive: $isEditingSessionName,
+            label: {
+                HStack {
+                    Text("Session Name")
+                    Spacer()
+                    Text(viewModel.sessionName.isEmpty ? "N/A" : viewModel.sessionName)
+                        .foregroundColor(.gray)
+                        .padding(.trailing, 6)
+                }
+            })
+            .onTapGesture {
+                isEditingSessionName.toggle()
+            }
+            .alert("Session Name", isPresented: $isEditingSessionName) {
+                TextField("Enter session name", text: $newSessionName)
+                    .textInputAutocapitalization(.never)
+                Button("Ok") {
+                    submitSession(newSessionName: $newSessionName)
+                }
+                Button("Cancel", role: .cancel) { }
+            }
+    }
+
+
+    func submitID(newParticipantID: Binding<String>) {
+        viewModel.participantID = newParticipantID.wrappedValue
+    }
+    
+    func submitSession(newSessionName: Binding<String>) {
+        viewModel.sessionName = newSessionName.wrappedValue
+    }
+
+}
+
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SettingsView()
     }
 }
 
-struct Setting<Destination: View>: Identifiable {
-    let id = UUID()
-    let name: String
-    let icon: String
-    let action: () -> NavigationLink<Text, Destination>
-}
 

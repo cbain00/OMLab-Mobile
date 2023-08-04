@@ -16,74 +16,49 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     
     // MARK: Outlets
     var sceneView: ARSCNView!
-    weak var recordingSwitch: UISwitch!
-    weak var recordingName: UITextField!
-    //weak var logTextView: UITextView!
-    var isRecordingSwitchOn = false
+    weak var delegate: EyeTrackingViewControllerDelegate?
+    //weak var recordingSwitch: UISwitch!
+    //weak var recordingName: UITextField!
     
+    // continued recording state of app
+    var isRecording = false
     let recorder = RPScreenRecorder.shared()
     var recordBool = false
-    
     var outputURL: URL!
+    
+    let defaultName = "file"
+    
+    var udpTriggered = false {
+        didSet {
+            delegate?.udpTriggeredDidChange(udpTriggered)
+        }
+    }
 
     // https://stackoverflow.com/questions/35006738/auto-scroll-for-uitextview-using-swift-ios-app
     // MARK: Properties
     var eyeTrackingRecording : EyeTrackingRecording!
     var eyeTrackingNetworkService : EyeTrackingNetworkService!
     var faceAnchorsAndContentControllers: [ARFaceAnchor: VirtualContentController] = [:]
-
+    
     
     // MARK: - View Controller Life Cycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // ARView for head & eye tracking
         let sceneView = ARSCNView(frame: view.bounds)
-        sceneView.translatesAutoresizingMaskIntoConstraints = false // disable auto layout
-        
+        sceneView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(sceneView)
-        
         NSLayoutConstraint.activate([
             sceneView.topAnchor.constraint(equalTo: view.topAnchor),
             sceneView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
-        
-        let recordingSwitch = UISwitch()
-        recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
-        recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
-        
-        view.addSubview(recordingSwitch)
-        
-        NSLayoutConstraint.activate([
-            recordingSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
-        ])
-        
-        /*
-        let recordingName = UITextField()
-        recordingName.translatesAutoresizingMaskIntoConstraints = false
-        recordingName.placeholder = "Enter recording name"
-        recordingName.borderStyle = .roundedRect
-        recordingName.returnKeyType = .done
-        recordingName.delegate = self
-
-        view.addSubview(recordingName)
-        
-        NSLayoutConstraint.activate([
-            recordingName.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            recordingName.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            recordingName.widthAnchor.constraint(equalToConstant: 200),
-            recordingName.heightAnchor.constraint(equalToConstant: 30)
-        ])
-         */
-
-        // asign values to existing variables
+                
+        // Set up sceneView properties
         self.sceneView = sceneView
-        self.recordingSwitch = recordingSwitch
-        //self.recordingName = recordingName
-
         sceneView.delegate = self
         sceneView.session.delegate = self
         sceneView.automaticallyUpdatesLighting = true
@@ -94,24 +69,13 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         // initialize UDP listener
         eyeTrackingNetworkService = EyeTrackingNetworkService(on:8000, self)
     }
+
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder() // Dismiss the keyboard
         return true
     }
     
-    @objc func buttonOnClick(_ sender: UISwitch) {
-        
-        if sender.isOn {
-            startRecordingReplayKit()
-        }
-        
-        else {
-            stopRecordingReplayKit()
-        }
-        print("button pressed")
-    }
-
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -145,11 +109,19 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     // Running AR Session
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
         let faceAnchor = anchors[0] as! ARFaceAnchor
-        eyeTrackingRecording.RecordData(recordingSwitchIsOn: recordingSwitch.isOn, session, faceAnchor, "file")
-        //self.displayFileNamer()
+        eyeTrackingRecording.RecordData(recordingSwitchIsOn: isRecording, session, faceAnchor, defaultName)
     }
     
-    // start screen recording after button is pressed
+    func startRecording() {
+        isRecording = true
+        startRecordingReplayKit()
+    }
+    
+    func stopRecording() {
+        isRecording = false
+        stopRecordingReplayKit()
+    }
+    
     func startRecordingReplayKit() {
         recorder.startRecording { (error) in
             guard error == nil else {
@@ -159,7 +131,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
         }
     }
     
-    // stop screen recording after button is pressed
     func stopRecordingReplayKit() {
         // if recording, stop recording, else don't do anything
         // this is to avoid permission being presented twice
@@ -195,58 +166,11 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             print("File saved successfully as: \(videoRecorded)")
         }
     }
-
-    func displayFileNamer() {
-        if isRecordingSwitchOn == recordingSwitch.isOn {
-            // Recording switch state hasn't changed, so return
-            return
-        }
-        
-        isRecordingSwitchOn = recordingSwitch.isOn
-
-        let alertController = UIAlertController(title: "File Name", message: "Enter a name for the recording", preferredStyle: .alert)
-
-        alertController.addTextField { textField in
-            textField.placeholder = "Enter Recording Name"
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            self.resetTracking()
-        }
-
-        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
-            guard let fileName = alertController.textFields?.first?.text else {
-                self.resetTracking()
-                return
-            }
-
-            self.renameFile(fileName: self.eyeTrackingRecording.folderName, newFileName: fileName)
-            self.resetTracking()
-        }
-
-        alertController.addAction(cancelAction)
-        alertController.addAction(saveAction)
-
-        present(alertController, animated: true, completion: nil)
-    }
-
-    func renameFile(fileName: String, newFileName: String) {
-        let fileManager = FileManager.default
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = documentsURL.appendingPathComponent(fileName)
-        let newFileURL = documentsURL.appendingPathComponent(newFileName)
-        
-        do {
-            try fileManager.moveItem(at: fileURL, to: newFileURL)
-            print("File named successfully.")
-        } catch {
-            print("Error renaming file: \(error.localizedDescription)")
-        }
-    }
     
+    // record event message being sent, also create new file if needed
     func recordEvent(_ message: String) {
         DispatchQueue.main.async {
-            self.eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: self.recordingSwitch.isOn, message, "file")
+            self.eyeTrackingRecording.RecordMessage(recordingSwitchIsOn: self.isRecording, message, self.defaultName)
         }
     }
     
@@ -333,3 +257,98 @@ extension EyeTrackingViewController: ARSCNViewDelegate {
         faceAnchorsAndContentControllers[faceAnchor] = nil
     }
 }
+
+protocol EyeTrackingViewControllerDelegate: AnyObject {
+    func udpTriggeredDidChange(_ value: Bool)
+}
+
+
+
+/*
+let recordingName = UITextField()
+recordingName.translatesAutoresizingMaskIntoConstraints = false
+recordingName.placeholder = "Enter recording name"
+recordingName.borderStyle = .roundedRect
+recordingName.returnKeyType = .done
+recordingName.delegate = self
+
+view.addSubview(recordingName)
+
+NSLayoutConstraint.activate([
+    recordingName.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+    recordingName.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+    recordingName.widthAnchor.constraint(equalToConstant: 200),
+    recordingName.heightAnchor.constraint(equalToConstant: 30)
+])
+ 
+ func displayFileNamer() {
+     if isRecordingSwitchOn {
+         // Recording switch state hasn't changed, so return
+         return
+     }
+     
+     let alertController = UIAlertController(title: "File Name", message: "Enter a name for the recording", preferredStyle: .alert)
+
+     alertController.addTextField { textField in
+         textField.placeholder = "Enter Recording Name"
+     }
+
+     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+         self.resetTracking()
+     }
+
+     let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+         guard let fileName = alertController.textFields?.first?.text else {
+             self.resetTracking()
+             return
+         }
+
+         self.renameFile(fileName: self.eyeTrackingRecording.folderName, newFileName: fileName)
+         self.resetTracking()
+     }
+
+     alertController.addAction(cancelAction)
+     alertController.addAction(saveAction)
+
+     present(alertController, animated: true, completion: nil)
+ }
+ 
+ func renameFile(fileName: String, newFileName: String) {
+     let fileManager = FileManager.default
+     let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+     let fileURL = documentsURL.appendingPathComponent(fileName)
+     let newFileURL = documentsURL.appendingPathComponent(newFileName)
+     
+     do {
+         try fileManager.moveItem(at: fileURL, to: newFileURL)
+         print("File named successfully.")
+     } catch {
+         print("Error renaming file: \(error.localizedDescription)")
+     }
+ }
+ 
+ //        // recording switch
+ //        let recordingSwitch = UISwitch()
+ //        recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
+ //        //recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
+ //        view.addSubview(recordingSwitch)
+ //        NSLayoutConstraint.activate([
+ //            recordingSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+ //            recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
+ //        ])
+ 
+ //    self.recordingSwitch = recordingSwitch
+
+ //    @objc func buttonOnClick(_ sender: UISwitch) {
+ //
+ //        if sender.isOn {
+ //            startRecordingReplayKit()
+ //        }
+ //
+ //        else {
+ //            stopRecordingReplayKit()
+ //        }
+ //        print("button pressed")
+ //    }
+
+ */

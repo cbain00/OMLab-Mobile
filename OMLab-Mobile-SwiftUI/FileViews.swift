@@ -20,14 +20,54 @@ struct FileListView: View {
     var body: some View {
         List {
             ForEach(viewModel.files.sorted(by: viewModel.sortFunction), id: \.self) { fileFolder in
-                NavigationLink(destination: FileDetailView(file: fileFolder, viewModel: viewModel)) {
-                    Text(fileFolder.name)
-                }
+                NavigationLink(
+                    destination: FileDetailView(file: fileFolder, viewModel: viewModel),
+                    label: {
+                        FileRowView(file: fileFolder)
+                            .listRowInsets(.init(top: 10,
+                                                 leading: 0,
+                                                 bottom: 10,
+                                                 trailing: 10))
+                    })
             }
         }
         .onAppear {
             viewModel.setFileList()
         }
+    }
+}
+
+
+struct FileRowView: View {
+    var file: FileFolder
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            if let thumbnail = file.thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable() // Allow the image to be resized
+                    .aspectRatio(contentMode: .fit) // Maintain the aspect ratio
+                    .frame(width: 30, height: 50) // Set the desired size for the thumbnail
+            } else {
+                // Placeholder image if no thumbnail is available
+                Color.gray
+                    .frame(width: 30, height: 50)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(file.name)
+                    .font(.headline)
+                Text(formatDate(file.timestamp))
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MM/dd/yy HH:mm:ss"
+        return dateFormatter.string(from: date)
     }
 }
 
@@ -41,14 +81,19 @@ struct FileDetailView: View {
     @State private var isShowingVideoPlayer = false
     @State private var isShowingLog = false
     @State private var newFileName = ""
-        
+    
+    init(file: FileFolder, viewModel: HomeView_ViewModel) {
+        self.file = file
+        self.viewModel = viewModel
+        print("Initializing Detail View for \(file.name)")
+    }
+
     var body: some View {
         let fileName = file.name
         
         VStack {
             HStack {
                 Spacer()
-                
                 Text(fileName)
                     .font(.title3)
                     .fontWeight(.bold)
@@ -131,9 +176,14 @@ struct FileDetailView: View {
             .padding(.horizontal)
             
                 Spacer()
-                            
-                GraphView(fileName: fileName, group: .eyes)
-                GraphView(fileName: fileName, group: .head)
+            
+                ScrollView {
+                    VStack(spacing: 20) {
+                        GraphView(fileName: fileName, group: .eyes)
+                        GraphView(fileName: fileName, group: .head)
+                    }
+                    .frame(maxHeight: .infinity)
+                }
         }
         .onAppear {
             viewModel.addRecentFile(file)
@@ -476,45 +526,49 @@ struct GraphView: View {
                 let yMin_Y = rightEyeYData.map { $0.y }.min() ?? 0
                 let yMax_Y = rightEyeYData.map { $0.y }.max() ?? 0
                 
-                VStack {
-                    // x data
-                    Text("Eye Horizontal (deg)")
-                        .fontWeight(.bold)
-                    
-                    Chart {
-                        ForEach(rightEyeXData, id: \.id) { item in
-                            LineMark(
-                                x: .value("Time", item.x),
-                                y: .value("RightEyeX", item.y),
-                                series: .value("Time", "RightEyeX")
-                            )
-                            .foregroundStyle(.red)
+                VStack(spacing: 20) {
+                    VStack {
+                        // x data
+                        Text("Eye Horizontal (deg)")
+                            .fontWeight(.bold)
+                        
+                        Chart {
+                            ForEach(rightEyeXData, id: \.id) { item in
+                                LineMark(
+                                    x: .value("Time", item.x),
+                                    y: .value("RightEyeX", item.y),
+                                    series: .value("Time", "RightEyeX")
+                                )
+                                .foregroundStyle(.red)
+                            }
+                        }
+                        .chartXScale(domain: [xMin_X, xMax_X])
+                        .chartYScale(domain: [yMin_X, yMax_X])
+                        .chartYAxis {
+                            AxisMarks(position: .leading)
                         }
                     }
-                    .chartXScale(domain: [xMin_X, xMax_X])
-                    .chartYScale(domain: [yMin_X, yMax_X])
-                    .chartYAxis {
-                        AxisMarks(position: .leading)
-                    }
                     
-                    // y data
-                    Text("Eye Vertical (deg)")
-                        .fontWeight(.bold)
-                    
-                    Chart {
-                        ForEach(rightEyeYData, id: \.id) { item in
-                            LineMark(
-                                x: .value("Time", item.x),
-                                y: .value("RightEyeY", item.y),
-                                series: .value("Time", "RightEyeY")
-                            )
-                            .foregroundStyle(.blue)
+                    VStack {
+                        // y data
+                        Text("Eye Vertical (deg)")
+                            .fontWeight(.bold)
+                        
+                        Chart {
+                            ForEach(rightEyeYData, id: \.id) { item in
+                                LineMark(
+                                    x: .value("Time", item.x),
+                                    y: .value("RightEyeY", item.y),
+                                    series: .value("Time", "RightEyeY")
+                                )
+                                .foregroundStyle(.blue)
+                            }
                         }
-                    }
-                    .chartXScale(domain: [xMin_Y, xMax_Y])
-                    .chartYScale(domain: [yMin_Y, yMax_Y])
-                    .chartYAxis {
-                        AxisMarks(position: .leading)
+                        .chartXScale(domain: [xMin_Y, xMax_Y])
+                        .chartYScale(domain: [yMin_Y, yMax_Y])
+                        .chartYAxis {
+                            AxisMarks(position: .leading)
+                        }
                     }
                 }
             }

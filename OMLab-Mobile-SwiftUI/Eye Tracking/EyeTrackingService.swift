@@ -42,7 +42,7 @@ class EyeTrackingNetworkService: ObservableObject {
             case .ready:
                 self.isReady = true
                 self.listening = true
-                print(self.listening)
+                print("Listener connection established? \(self.listening)")
                 print("Listener connected to port \(port)")
             case .failed:
                 // Announce that we are no longer able to listen
@@ -106,13 +106,17 @@ class EyeTrackingNetworkService: ObservableObject {
             switch (stringFromByteArray ?? "") {
                 case "StartRecording" :
                 DispatchQueue.main.async {
-                    self.viewController.recordingSwitch.isOn = true
-                    self.viewController.startRecordingReplayKit()
+                    self.viewController.udpTriggered = true
+                    //self.viewController.recordingSwitch.isOn = true
+                    //self.viewController.isRecordingSwitchOn = true
+                    //self.viewController.startRecordingReplayKit()
                 }
                 case "StopRecording" :
                 DispatchQueue.main.async {
-                    self.viewController.recordingSwitch.isOn = false
-                    self.viewController.stopRecordingReplayKit()
+                    self.viewController.udpTriggered = false
+                    //self.viewController.recordingSwitch.isOn = false
+                    //self.viewController.isRecordingSwitchOn = false
+                    //self.viewController.stopRecordingReplayKit()
                 }
                 default:
                     // need to add case for when recording is not in progress and message is sent?

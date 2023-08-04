@@ -24,7 +24,6 @@ struct HomeView: View {
                 // view for list of saved user files
                 FileListView(viewModel: viewModel)
                 
-
                 Spacer()
             }
         }
@@ -47,8 +46,9 @@ struct HomeMenuView: View {
                 // Add other options as desired
                 
             } label: {
-                Image(systemName: "ellipsis")
-                    .frame(width: 25, height: 15, alignment: .trailing)
+                Image(systemName: "ellipsis.circle")
+                    .frame(width: 25, height: 25, alignment: .leading)
+                    .font(.system(size: 20))
             }
 
             Text("Home")

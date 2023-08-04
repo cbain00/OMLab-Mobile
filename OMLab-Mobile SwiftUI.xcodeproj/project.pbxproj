@@ -25,6 +25,7 @@
 		F63B703329F06AD100CF3BB2 /* TransformVisualization.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B703229F06AD100CF3BB2 /* TransformVisualization.swift */; };
 		F63B703D29F06BB500CF3BB2 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B703C29F06BB500CF3BB2 /* Utilities.swift */; };
 		F6888A0629FC2A5D00E97F7D /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = F6888A0529FC2A5D00E97F7D /* Models.scnassets */; };
+		F69DC83F2A7C393800F2DC7E /* PreviewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69DC83E2A7C393800F2DC7E /* PreviewProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 		F63B703C29F06BB500CF3BB2 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		F6888A0529FC2A5D00E97F7D /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
 		F6888A242A12B28B00E97F7D /* Charts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Charts.framework; path = System/Library/Frameworks/Charts.framework; sourceTree = SDKROOT; };
+		F69DC83E2A7C393800F2DC7E /* PreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewProvider.swift; sourceTree = "<group>"; };
 		F6B6ABF429F6CFD8005F3180 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -92,6 +94,7 @@
 				F63B701829EE03CA00CF3BB2 /* HomeView.swift */,
 				F63B701C29EF058100CF3BB2 /* CameraView.swift */,
 				F63B701E29EF46B600CF3BB2 /* FileViews.swift */,
+				F69DC83D2A7C38EF00F2DC7E /* Extensions */,
 				F63B702F29F06AA100CF3BB2 /* Face Overlay Content */,
 				F63B702729F0681B00CF3BB2 /* Eye Tracking */,
 				F63B700A29E8A54900CF3BB2 /* Assets.xcassets */,
@@ -135,6 +138,14 @@
 				F6888A242A12B28B00E97F7D /* Charts.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F69DC83D2A7C38EF00F2DC7E /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				F69DC83E2A7C393800F2DC7E /* PreviewProvider.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -221,6 +232,7 @@
 				F63B703D29F06BB500CF3BB2 /* Utilities.swift in Sources */,
 				F63B701529EDEC0100CF3BB2 /* OMLM_ViewModel.swift in Sources */,
 				F63B701B29EE041400CF3BB2 /* ProfileView.swift in Sources */,
+				F69DC83F2A7C393800F2DC7E /* PreviewProvider.swift in Sources */,
 				F63B702C29F0698C00CF3BB2 /* EyeTrackingService.swift in Sources */,
 				F63B700729E8A54700CF3BB2 /* OMLM_SwiftUIApp.swift in Sources */,
 			);
