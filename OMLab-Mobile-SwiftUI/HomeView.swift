@@ -24,7 +24,6 @@ struct HomeView: View {
                 // view for list of saved user files
                 FileListView(viewModel: viewModel)
                 
-
                 Spacer()
             }
         }

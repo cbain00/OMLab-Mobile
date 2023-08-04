@@ -6,12 +6,15 @@
 //
 
 import Foundation
+import UIKit
 
 struct FileFolder: Hashable, Identifiable {
     var id = UUID()
     var name: String
     var timestamp: Date
     var size: Int64
+    var videoURL: URL?
+    var thumbnail: UIImage?
 }
 
 struct CSVFile: Hashable, Identifiable {

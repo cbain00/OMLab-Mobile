@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import UIKit
+import AVFoundation
 
 class HomeView_ViewModel: ObservableObject {
     @Published var sortOption = 0 // default sorting option is "Newest to Oldest"
@@ -95,10 +97,13 @@ class HomeView_ViewModel: ObservableObject {
                 guard !isTrashFolder(fileFolderURL) else { continue }
                 
                 let timestamp = getFileFolderCreationDate(fileFolderURL: fileFolderURL)
+                let emptyDate = Date(timeIntervalSince1970: 0)
                 let name = fileFolderURL.lastPathComponent
                 let size = getFileFolderSize(fileFolderURL: fileFolderURL)
-                                
-                let fileFolder = FileFolder(name: name, timestamp: timestamp ?? Date(timeIntervalSince1970: 0), size: size)
+                let videoURL = getVideoURL(fileFolderURL: fileFolderURL)
+                let thumbnail = self.getVideoThumbnail(videoURL: videoURL)
+                                                
+                let fileFolder = FileFolder(name: name, timestamp: timestamp ?? emptyDate, size: size, videoURL: videoURL, thumbnail: thumbnail)
                 fileFolders.append(fileFolder)
             }
         } catch {
@@ -147,9 +152,48 @@ class HomeView_ViewModel: ObservableObject {
         totalSize /= 1000
         return totalSize
     }
+    
+    func getVideoURL(fileFolderURL: URL) -> URL? {
+        guard let filesURL = try? fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) else {
+            return nil
+        }
+        
+        guard let mp4FileURL = filesURL.first(where: { $0.pathExtension == "mp4" }) else {
+            return nil
+        }
+        
+        return mp4FileURL
+    }
+    
+    func getVideoThumbnail(videoURL: URL?) -> UIImage? {
+        if videoURL == nil {
+            return nil
+        }
+        
+        return imageFromVideo(url: videoURL!, at: 0)
+        
+        // https://stackoverflow.com/questions/42520453/extract-frame-from-video-in-swift
+        func imageFromVideo(url: URL, at time: TimeInterval) -> UIImage? {
+            let asset = AVURLAsset(url: url)
+
+            let assetIG = AVAssetImageGenerator(asset: asset)
+            assetIG.appliesPreferredTrackTransform = true
+            assetIG.apertureMode = AVAssetImageGenerator.ApertureMode.encodedPixels
+
+            let cmTime = CMTime(seconds: time, preferredTimescale: 60)
+            let thumbnailImageRef: CGImage
+            do {
+                thumbnailImageRef = try assetIG.copyCGImage(at: cmTime, actualTime: nil)
+            } catch let error {
+                print("Error: \(error)")
+                return nil
+            }
+
+            return UIImage(cgImage: thumbnailImageRef)
+        }
+    }
 
     func deleteFolder(_ file: String) {
-        // Perform the deletion logic here
         let fileURL = documentsURL.appendingPathComponent(file)
         
         do {
