@@ -90,27 +90,33 @@ class HomeView_ViewModel: ObservableObject {
     func makeFileList() -> [FileFolder] {
         var fileFolders = [FileFolder]()
         
-        do {
-            let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            
-            for fileFolderURL in fileFolderURLs {
-                guard !isTrashFolder(fileFolderURL) else { continue }
+        // check if file has been saved to reduce loading when navigating back to home view
+        if fileHasBeenSaved() {
+            do {
+                let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
                 
-                let timestamp = getFileFolderCreationDate(fileFolderURL: fileFolderURL)
-                let emptyDate = Date(timeIntervalSince1970: 0)
-                let name = fileFolderURL.lastPathComponent
-                let size = getFileFolderSize(fileFolderURL: fileFolderURL)
-                let videoURL = getVideoURL(fileFolderURL: fileFolderURL)
-                let thumbnail = self.getVideoThumbnail(videoURL: videoURL)
-                                                
-                let fileFolder = FileFolder(name: name, timestamp: timestamp ?? emptyDate, size: size, videoURL: videoURL, thumbnail: thumbnail)
-                fileFolders.append(fileFolder)
+                for fileFolderURL in fileFolderURLs {
+                    guard !isTrashFolder(fileFolderURL) else { continue }
+                    
+                    let timestamp = getFileFolderCreationDate(fileFolderURL: fileFolderURL)
+                    let emptyDate = Date(timeIntervalSince1970: 0)
+                    let name = fileFolderURL.lastPathComponent
+                    let size = getFileFolderSize(fileFolderURL: fileFolderURL)
+                    let videoURL = getVideoURL(fileFolderURL: fileFolderURL)
+                    let thumbnail = self.getVideoThumbnail(videoURL: videoURL)
+                                                    
+                    let fileFolder = FileFolder(name: name, timestamp: timestamp ?? emptyDate, size: size, videoURL: videoURL, thumbnail: thumbnail)
+                    fileFolders.append(fileFolder)
+                }
+            } catch {
+                print("Error while enumerating files \(documentsURL.path): \(error.localizedDescription)")
             }
-        } catch {
-            print("Error while enumerating files \(documentsURL.path): \(error.localizedDescription)")
+            
+            return fileFolders
+            
+        } else {
+            return files
         }
-        
-        return fileFolders
     }
     
     func isTrashFolder(_ fileFolderURL: URL) -> Bool {
@@ -192,6 +198,22 @@ class HomeView_ViewModel: ObservableObject {
             return UIImage(cgImage: thumbnailImageRef)
         }
     }
+    
+    func fileHasBeenSaved() -> Bool {
+        do {
+            let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let currentDocumentsDirectoryLength = fileFolderURLs.count
+            
+            if currentDocumentsDirectoryLength > files.count {
+                return true
+            } else {
+                return false
+            }
+        } catch {
+            print("Error accessing folder: \(error.localizedDescription)")
+        }
+        return false
+    }
 
     func deleteFolder(_ file: String) {
         let fileURL = documentsURL.appendingPathComponent(file)
@@ -203,4 +225,11 @@ class HomeView_ViewModel: ObservableObject {
             print("Error deleting file: \(error.localizedDescription)")
         }
     }
+}
+
+class Settings_ViewModel: ObservableObject {
+    @Published var participantID: String = ""
+    @Published var sessionName: String = ""
+    @Published var allowUDPConnections: Bool = false
+    @Published var allowScreenRecording: Bool = false
 }
