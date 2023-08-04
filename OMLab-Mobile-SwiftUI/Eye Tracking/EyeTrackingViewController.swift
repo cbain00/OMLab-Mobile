@@ -57,17 +57,7 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
             sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
-        
-        // recording switch
-        let recordingSwitch = UISwitch()
-        recordingSwitch.translatesAutoresizingMaskIntoConstraints = false
-        recordingSwitch.addTarget(self, action: #selector(buttonOnClick(_:)), for: .valueChanged)
-        view.addSubview(recordingSwitch)
-        NSLayoutConstraint.activate([
-            recordingSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            recordingSwitch.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
-        ])
-        
+                
         // recording button
         let isRecording = Binding<Bool>(
             get: { self.recording },
@@ -93,7 +83,6 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
                 
         // Set up sceneView properties
         self.sceneView = sceneView
-        self.recordingSwitch = recordingSwitch
         sceneView.delegate = self
         sceneView.session.delegate = self
         sceneView.automaticallyUpdatesLighting = true
