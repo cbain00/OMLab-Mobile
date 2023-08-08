@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Foundation
+import SystemConfiguration.CaptiveNetwork
 
 struct SettingsView: View {
     @ObservedObject var viewModel: Settings_ViewModel
@@ -44,10 +46,19 @@ struct SettingsView: View {
                 allowUDPConnectionsView
                 allowScreenRecordingView
             }
+            
+            HStack(spacing: 4.5) {
+                Text("Local WiFi IP Address:")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                
+                Text(getIPAddress() ?? "nil")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
         }
         .listStyle(.insetGrouped)
         .padding(.horizontal, -20)
-        
     }
     
     private var participantIDView: some View {
@@ -121,7 +132,7 @@ struct SettingsView: View {
                 .foregroundColor(.green)
             
             Toggle(isOn: $viewModel.allowScreenRecording) {
-                Text("Record Tracking Sessions")
+                Text("Record Video Sessions")
             }
         }
     }
@@ -133,7 +144,40 @@ struct SettingsView: View {
     func submitSession(newSessionName: Binding<String>) {
         viewModel.sessionName = newSessionName.wrappedValue
     }
+    
+    func getIPAddress() -> String? {
+        var address : String?
 
+        // Get list of all interfaces on the local machine:
+        var ifaddr : UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddr) == 0 else { return nil }
+        guard let firstAddr = ifaddr else { return nil }
+
+        for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
+            let interface = ifptr.pointee
+
+            // Check for IPv4 or IPv6 interface:
+            let addrFamily = interface.ifa_addr.pointee.sa_family
+            if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
+
+                // Check interface name:
+                // wifi = ["en0"]
+                // wired = ["en2", "en3", "en4"]
+                // cellular = ["pdp_ip0","pdp_ip1","pdp_ip2","pdp_ip3"]
+                
+                let name = String(cString: interface.ifa_name)
+                // Only accessing WiFi
+                if  name == "en0" {
+                    // Convert interface address to readable string:
+                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                    getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
+                    address = String(cString: hostname)
+                }
+            }
+        }
+        freeifaddrs(ifaddr)
+        return address
+    }
 }
 
 struct SettingsView_Previews: PreviewProvider {

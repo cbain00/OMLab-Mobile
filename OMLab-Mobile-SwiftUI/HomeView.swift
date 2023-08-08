@@ -27,6 +27,7 @@ struct HomeView: View {
                 Spacer()
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 
@@ -43,9 +44,6 @@ struct HomeMenuView: View {
                 }) {
                     Label("Report a problem", systemImage: "exclamationmark.triangle.fill")
                 }
-                
-                // Add other options as desired
-                
             } label: {
                 Image(systemName: "ellipsis.circle")
                     .frame(width: 25, height: 25, alignment: .leading)
@@ -136,7 +134,7 @@ struct SortByView: View {
                 Image(systemName: "arrow.up.arrow.down")
             }
         }
-        .padding(.horizontal, 20.0)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -144,39 +142,38 @@ struct SortByView: View {
 struct SearchBarView: View {
     @ObservedObject var viewModel: HomeView_ViewModel
     @State private var searchText: String = ""
-    @State private var isSearching = true
     
     var body: some View {
         VStack {
             SearchBar(text: $searchText, placeholder: "Search Files...")
             List {
                 if !viewModel.recentFiles.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }).isEmpty {
-                    Section(header: Text("Recently Viewed")) {
-                        ForEach(viewModel.recentFiles.filter {
-                            searchText.isEmpty ? true : $0.name.lowercased().contains(searchText.lowercased())
-                        }, id: \.self) { file in
-                            NavigationLink(destination: FileDetailView(file: file, viewModel: viewModel)) {
-                                Text(file.name)
-                            }
-                        }
-                    }
+                    Section(header: Text("Recently Viewed").foregroundColor(.blue)) {
+                        ForEach(viewModel.recentFiles
+                            .filter {
+                                searchText.isEmpty ? true : $0.name.lowercased().contains(searchText.lowercased())
+                            }, id: \.self) { file in
+                            FileRowView_SearchMenu(file: file,
+                                                   viewModel: viewModel,
+                                                   destination: FileDetailView(file: file, viewModel: viewModel))}}
                 }
                 
                 if viewModel.files.filter({ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }).isEmpty {
                     Text("No files found")
                         .foregroundColor(.gray)
                 } else {
-                    Section(header: Text("All Files")) {
-                        ForEach(viewModel.files.filter {
-                            searchText.isEmpty ? true : $0.name.lowercased().contains(searchText.lowercased())
-                        }.sorted(by: viewModel.sortFunction), id: \.self) { file in
-                            NavigationLink(destination: FileDetailView(file: file, viewModel: viewModel)) {
-                                Text(file.name)
+                    Section(header: Text("All Files").foregroundColor(.blue)) {
+                        ForEach(viewModel.files
+                            .filter {
+                                searchText.isEmpty ? true : $0.name.lowercased().contains(searchText.lowercased())
                             }
-                        }
-                    }
+                            .sorted(by: viewModel.sortFunction), id: \.self) { file in
+                            FileRowView_SearchMenu(file: file,
+                                                   viewModel: viewModel,
+                                                   destination: FileDetailView(file: file, viewModel: viewModel))}}
                 }
             }
+            .padding(.horizontal, -10)
         }
         .navigationTitle(Text("Search Files"))
     }

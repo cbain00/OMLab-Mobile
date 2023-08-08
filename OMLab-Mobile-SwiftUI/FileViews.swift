@@ -20,17 +20,12 @@ struct FileListView: View {
     var body: some View {
         List {
             ForEach(viewModel.files.sorted(by: viewModel.sortFunction), id: \.self) { fileFolder in
-                NavigationLink(
-                    destination: FileDetailView(file: fileFolder, viewModel: viewModel),
-                    label: {
-                        FileRowView(file: fileFolder)
-                            .listRowInsets(.init(top: 10,
-                                                 leading: 0,
-                                                 bottom: 10,
-                                                 trailing: 10))
-                    })
+                FileRowView(file: fileFolder,
+                            viewModel: viewModel,
+                            destination: FileDetailView(file: fileFolder, viewModel: viewModel))
             }
         }
+        .padding(.horizontal, -20)
         .onAppear {
             viewModel.setFileList()
         }
@@ -38,63 +33,185 @@ struct FileListView: View {
 }
 
 
-struct FileRowView: View {
+struct FileRowView<Destination>: View where Destination: View {
     var file: FileFolder
-    
+    @ObservedObject var viewModel: HomeView_ViewModel
+    @State var destination: Destination
+
+    @State private var transitionState: TransitionState = .inactive
+    @State private var highlightColor: Color = .clear
+
     var body: some View {
-        HStack(spacing: 6) {
-            if let thumbnail = file.thumbnail {
-                Image(uiImage: thumbnail)
-                    .resizable() // Allow the image to be resized
-                    .aspectRatio(contentMode: .fit) // Maintain the aspect ratio
-                    .frame(width: 30, height: 50) // Set the desired size for the thumbnail
-            } else {
-                // Placeholder image if no thumbnail is available
-                Color.gray
-                    .frame(width: 30, height: 50)
+        let isActive = Binding<Bool>(
+            get: { transitionState == .active },
+            set: { isNowActive in
+                if !isNowActive {
+                    transitionState = .inactive
+                }
             }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(file.name)
-                    .font(.headline)
-                Text(formatDate(file.timestamp))
-                    .font(.caption)
-                    .foregroundColor(.gray)
+        )
+
+        Button {
+            guard transitionState == .inactive else { return }
+            transitionState = .loading
+            highlightColor = Color(UIColor.tertiarySystemBackground)
+
+            // Mimic 50 ms wait
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(50)) {
+                transitionState = .active
+                highlightColor = .clear
             }
+        } label: {
+            HStack {
+                if let thumbnail = file.thumbnail {
+                    Image(uiImage: thumbnail)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30, height: 50)
+                } else {
+                    // Placeholder image if no thumbnail is available
+                    Color.gray
+                        .frame(width: 30, height: 50)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(file.name)
+                        .font(.headline)
+                    Text(formatDate(file.timestamp))
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+
+                if transitionState == .loading {
+                    ProgressView().progressViewStyle(CircularProgressViewStyle())
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(PlainButtonStyle())
+        .listRowBackground(highlightColor)
+        .background(
+            NavigationLink(
+                isActive: isActive,
+                destination: { destination },
+                label: { }
+            )
+            .opacity(transitionState == .loading ? 0 : 1)
+        )
     }
-    
+
+    private enum TransitionState {
+        case inactive
+        case loading
+        case active
+    }
+
     private func formatDate(_ date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM/dd/yy HH:mm:ss"
         return dateFormatter.string(from: date)
     }
+
+}
+
+
+struct FileRowView_SearchMenu<Destination>: View where Destination: View {
+    var file: FileFolder
+    @ObservedObject var viewModel: HomeView_ViewModel
+    @State var destination: Destination
+
+    @State private var transitionState: TransitionState = .inactive
+    @State private var highlightColor: Color = .clear
+
+    var body: some View {
+        let isActive = Binding<Bool>(
+            get: { transitionState == .active },
+            set: { isNowActive in
+                if !isNowActive {
+                    transitionState = .inactive
+                }
+            }
+        )
+
+        Button {
+            guard transitionState == .inactive else { return }
+            transitionState = .loading
+            highlightColor = Color(UIColor.tertiarySystemBackground)
+
+            // Mimic 50 ms wait
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(50)) {
+                transitionState = .active
+                highlightColor = .clear
+            }
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(file.name)
+                        .font(.headline)
+                    Text(formatDate(file.timestamp))
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+
+                if transitionState == .loading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+        .listRowBackground(highlightColor)
+        .background(
+            NavigationLink(
+                isActive: isActive,
+                destination: { destination },
+                label: { }
+            )
+            .opacity(transitionState == .loading ? 0 : 1)
+        )
+    }
+
+    private enum TransitionState {
+        case inactive
+        case loading
+        case active
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MM/dd/yy HH:mm:ss"
+        return dateFormatter.string(from: date)
+    }
+
 }
 
 
 struct FileDetailView: View {
     var file: FileFolder
+    
     @ObservedObject var viewModel: HomeView_ViewModel
     @Environment(\.presentationMode) var presentationMode
-    @State private var showRenameView = false
-    @State private var showFileInfoView = false
+    @State private var isShowingFileInfoView = false
     @State private var isShowingVideoPlayer = false
     @State private var isShowingLog = false
     @State private var newFileName = ""
     
-    init(file: FileFolder, viewModel: HomeView_ViewModel) {
-        self.file = file
-        self.viewModel = viewModel
-        print("Initializing Detail View for \(file.name)")
-    }
-
+    let fileManager = FileManager.default
+    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    
     var body: some View {
-        let fileName = file.name
+        var fileName = file.name
+        var fileNameHeader = Text(fileName)
         
         VStack {
             HStack {
                 Spacer()
-                Text(fileName)
+                fileNameHeader
                     .font(.title3)
                     .fontWeight(.bold)
                     .toolbar {
@@ -123,34 +240,41 @@ struct FileDetailView: View {
                                         Button(action: {}) {
                                             Label("Export Zip", systemImage: "archivebox")
                                         }
+                                        // to be implemented
+                                        .disabled(true)
                                         
                                         Button(action: {
                                             // allow user to share txt file data
-                                            shareFile(fileName: fileName)
+                                            shareTrackingData(fileName: fileName)
                                         }) {
                                             Label("Export Tracking Data", systemImage: "doc.text")
                                         }
                                         
-                                        Button(action: {}) {
+                                        Button(action: {
+                                            shareVideo(fileName: fileName)
+                                        }) {
                                             Label("Export Video", systemImage: "play.rectangle")
                                         }
+                                        .disabled(!checkForMP4(file: fileName).exists)
                                         
-                                        Button(action: {}) {
+                                        Button(action: {
+                                            shareLog(fileName: fileName)
+                                        }) {
                                             Label("Export Session Log", systemImage: "doc.text")
                                         }
+                                        .disabled(!checkForEventFile(file: fileName).exists)
                                     }
                                     
                                     Button(action: {
                                         // Show rename view
-                                        showRenameView = true
-                                        newFileName = fileName
+                                        Rename(file: file)
                                     }) {
                                         Label("Rename", systemImage: "pencil")
                                     }
                                     
                                     Button(action: {
                                         // show file info sheet
-                                        showFileInfoView = true
+                                        isShowingFileInfoView = true
                                     }) {
                                         Label("Folder Info", systemImage: "info.circle")
                                     }
@@ -159,7 +283,7 @@ struct FileDetailView: View {
                                 Section {
                                     Button(role: .destructive, action: {
                                         // allow user to attempt to delete file
-                                        Delete(fileName: fileName, file: file)
+                                        Delete(file: file)
                                     }) {
                                         Label("Delete", systemImage: "trash.fill")
                                     }
@@ -188,16 +312,8 @@ struct FileDetailView: View {
         .onAppear {
             viewModel.addRecentFile(file)
         }
-        
-        .sheet(isPresented: $showRenameView) {
-            RenameFileView(fileName: fileName, newFileName: $newFileName) { newName in
-                renameFile(fileName: fileName, newFileName: newName)
-                viewModel.removeFromRecentFiles(file)
-                showRenameView = false
-            }
-        }
-
-        .sheet(isPresented: $showFileInfoView) {
+                
+        .sheet(isPresented: $isShowingFileInfoView) {
             FileInfoView(file: file)
         }
         
@@ -210,38 +326,13 @@ struct FileDetailView: View {
         }
     }
     
-    struct RenameFileView: View {
-        var fileName: String
-        @Binding var newFileName: String
-        var onRename: (String) -> Void
-        
-        var body: some View {
-            VStack {
-                Text("Rename File")
-                    .font(.title)
-                    .fontWeight(.bold)
-                
-                TextField("New File Name", text: $newFileName) { isEditing in
-                    if !isEditing {
-                        onRename(newFileName)
-                    }
-                }
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                
-                Spacer()
-            }
-            .padding()
-        }
-    }
-    
     struct FileInfoView: View {
         var file: FileFolder
         let imageSize: CGFloat = 30
         let rowSpaceLength: CGFloat = 20
         
         var body: some View {
-            VStack {
+            VStack(spacing: 10) {
                 HStack {
                     Image(systemName: "info.circle")
                         .font(.system(size: imageSize))
@@ -369,35 +460,59 @@ struct FileDetailView: View {
             }
         }
     }
-
-
-    func renameFile(fileName: String, newFileName: String) {
-        let fileManager = FileManager.default
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = documentsURL.appendingPathComponent(fileName)
-        let newFileURL = documentsURL.appendingPathComponent(newFileName)
-        
-        do {
-            try fileManager.moveItem(at: fileURL, to: newFileURL)
-            print("File renamed successfully.")
-        } catch {
-            print("Error renaming file: \(error.localizedDescription)")
-        }
-    }
     
-    func shareFile(fileName: String) {
-        enum FileType {
-            case zip
-            case eyeData
-            case video
-            case log
-        }
-        
+    func Rename(file: FileFolder) {
         let allScenes = UIApplication.shared.connectedScenes
         let scene = allScenes.first { $0.activationState == .foregroundActive }
 
-        let fileManager = FileManager.default
-        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let alertController = UIAlertController(title: "Rename File", message: "Enter new file name", preferredStyle: .alert)
+        alertController.addTextField { textField in
+            textField.placeholder = "New File Name"
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+
+        let confirmRename = UIAlertAction(title: "Rename", style: .default) { _ in
+            if let newFileName = alertController.textFields?.first?.text {
+                viewModel.removeFromRecentFiles(file)
+                renameFile(fileName: file.name, newFileName: newFileName)
+            }
+        }
+
+        alertController.addAction(cancelAction)
+        alertController.addAction(confirmRename)
+
+        if let windowScene = scene as? UIWindowScene {
+             windowScene.keyWindow?.rootViewController?.present(alertController, animated: true, completion: nil)
+        }
+    }
+
+    func renameFile(fileName: String, newFileName: String) {
+        let allScenes = UIApplication.shared.connectedScenes
+        let scene = allScenes.first { $0.activationState == .foregroundActive }
+
+        let fileURL = documentsURL.appendingPathComponent(fileName)
+        let newFileURL = documentsURL.appendingPathComponent(newFileName)
+
+        do {
+            try fileManager.moveItem(at: fileURL, to: newFileURL)
+            print("File renamed successfully.")
+            print("New file location: \(newFileURL)")
+        } catch {
+            print("Error renaming file: \(error.localizedDescription)")
+            
+            let alert = UIAlertController(title: "Error", message: "File renaming failed. Please try again.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            
+            if let windowScene = scene as? UIWindowScene {
+                windowScene.keyWindow?.rootViewController?.present(alert, animated: true, completion: nil)
+            }
+        }
+    }
+
+    func shareTrackingData(fileName: String) {
+        let allScenes = UIApplication.shared.connectedScenes
+        let scene = allScenes.first { $0.activationState == .foregroundActive }
         let fileFolderURL = documentsURL.appendingPathComponent(fileName)
         
         do {
@@ -428,7 +543,73 @@ struct FileDetailView: View {
         }
     }
     
-    func Delete(fileName: String, file: FileFolder) {
+    func shareVideo(fileName: String) {
+        let allScenes = UIApplication.shared.connectedScenes
+        let scene = allScenes.first { $0.activationState == .foregroundActive }
+        let fileFolderURL = documentsURL.appendingPathComponent(fileName)
+
+        do {
+            let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let videoURLs = filesURL.filter { $0.pathExtension == "mp4" }
+
+            guard let videoURL = videoURLs.first else {
+                print("No video file found in the specified folder.")
+                
+                let alertController = UIAlertController(title: "File Not Found", message: "Unable to find video file for export.", preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(okAction)
+                
+                if let windowScene = scene as? UIWindowScene {
+                         windowScene.keyWindow?.rootViewController?.present(alertController, animated: true, completion: nil)
+                }
+                
+                return
+            }
+
+            let activityViewController = UIActivityViewController(activityItems: [videoURL], applicationActivities: nil)
+            if let windowScene = scene as? UIWindowScene {
+                     windowScene.keyWindow?.rootViewController?.present(activityViewController, animated: true, completion: nil)
+            }
+        }
+        catch {
+            print("Error while accessing file directory: \(error.localizedDescription)")
+        }
+    }
+    
+    func shareLog(fileName: String) {
+        let allScenes = UIApplication.shared.connectedScenes
+        let scene = allScenes.first { $0.activationState == .foregroundActive }
+        let fileFolderURL = documentsURL.appendingPathComponent(fileName)
+
+        do {
+            let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let eventFileURLs = filesURL.filter { $0.lastPathComponent.hasSuffix("_events.txt") }
+
+            guard let eventFileURL = eventFileURLs.first else {
+                print("No event file found in the specified folder.")
+                
+                let alertController = UIAlertController(title: "File Not Found", message: "Unable to find event file for export.", preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(okAction)
+                
+                if let windowScene = scene as? UIWindowScene {
+                         windowScene.keyWindow?.rootViewController?.present(alertController, animated: true, completion: nil)
+                }
+                
+                return
+            }
+
+            let activityViewController = UIActivityViewController(activityItems: [eventFileURL], applicationActivities: nil)
+            if let windowScene = scene as? UIWindowScene {
+                     windowScene.keyWindow?.rootViewController?.present(activityViewController, animated: true, completion: nil)
+            }
+        }
+        catch {
+            print("Error while accessing file directory: \(error.localizedDescription)")
+        }
+    }
+
+    func Delete(file: FileFolder) {
         let allScenes = UIApplication.shared.connectedScenes
         let scene = allScenes.first { $0.activationState == .foregroundActive }
         
@@ -436,7 +617,7 @@ struct FileDetailView: View {
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
         
         let confirmDelete = UIAlertAction(title: "Delete", style: .destructive) { _ in
-            viewModel.deleteFolder(fileName)
+            viewModel.deleteFolder(file.name)
             viewModel.removeFromRecentFiles(file)
             presentationMode.wrappedValue.dismiss()
         }
@@ -450,15 +631,12 @@ struct FileDetailView: View {
     }
     
     func checkForMP4(file: String) -> (exists: Bool, path: String?) {
-        let fileManager = FileManager.default
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileFolderURL = documentsURL.appendingPathComponent(file)
         
         do {
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             
             guard let mp4FileURL = filesURL.first(where: { $0.pathExtension == "mp4" }) else {
-                //print("No mp4 file found in folder: \(fileFolderURL.lastPathComponent).")
                 return (false, nil)
             }
             
@@ -472,8 +650,6 @@ struct FileDetailView: View {
     }
     
     func checkForEventFile(file: String) -> (exists: Bool, path: String?) {
-        let fileManager = FileManager.default
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileFolderURL = documentsURL.appendingPathComponent(file)
         
         do {
@@ -483,7 +659,6 @@ struct FileDetailView: View {
                 let eventFileName = eventFileURL.deletingPathExtension().lastPathComponent
                 return (true, eventFileName)
             } else {
-                //print("No event file file found in folder: \(fileFolderURL.lastPathComponent).")
                 return (false, nil)
             }
         } catch {
@@ -491,7 +666,6 @@ struct FileDetailView: View {
             return (false, nil)
         }
     }
-
 }
 
 
@@ -734,18 +908,66 @@ struct GraphView: View {
         }
         
         let count = min(xValues.count, yValues.count)
-        var dataArray: [GraphData] = []
         
-        for i in 0..<count {
-            if let x = Double(xValues[i]), let y = Double(yValues[i]) {
-                let graphData = GraphData(x: x, y: y)
-                dataArray.append(graphData)
+        let dataArray = Array(zip(xValues.prefix(count), yValues.prefix(count)))
+            .compactMap { x, y in
+                if let x = Double(x), let y = Double(y) {
+                    return GraphData(x: x, y: y)
+                }
+                return nil
             }
-        }
         
         return dataArray
     }
 }
+
+/// DO NOT DELETE!!!
+// file list w/o loading symbol when clicked
+//                NavigationLink(
+//                    destination: FileDetailView(file: fileFolder, viewModel: viewModel),
+//                    label: {
+//                        FileRowView(file: fileFolder)
+//                            .listRowInsets(.init(top: 10,
+//                                                 leading: 0,
+//                                                 bottom: 10,
+//                                                 trailing: 10))
+//                    }
+//                )
+// file list w/ loading symbol when clicked (breaks search view when active...)
+
+//struct FileRowView: View {
+//    var file: FileFolder
+//
+//    var body: some View {
+//        HStack(spacing: 6) {
+//            if let thumbnail = file.thumbnail {
+//                Image(uiImage: thumbnail)
+//                    .resizable() // Allow the image to be resized
+//                    .aspectRatio(contentMode: .fit) // Maintain the aspect ratio
+//                    .frame(width: 30, height: 50) // Set the desired size for the thumbnail
+//            } else {
+//                // Placeholder image if no thumbnail is available
+//                Color.gray
+//                    .frame(width: 30, height: 50)
+//            }
+//
+//            VStack(alignment: .leading, spacing: 2) {
+//                Text(file.name)
+//                    .font(.headline)
+//                Text(formatDate(file.timestamp))
+//                    .font(.caption)
+//                    .foregroundColor(.gray)
+//            }
+//        }
+//    }
+//
+//    private func formatDate(_ date: Date) -> String {
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = "MM/dd/yy HH:mm:ss"
+//        return dateFormatter.string(from: date)
+//    }
+//}
+
 
 // display graphs of data based on passed y-axis param
     
@@ -760,4 +982,30 @@ struct GraphView: View {
     GraphView(fileName: fileName, yvalue: "HeadY", color: .green)
     GraphView(fileName: fileName, yvalue: "HeadZ", color: .blue)
     */
+
+
+//    struct RenameFileView: View {
+//        var fileName: String
+//        @Binding var newFileName: String
+//        var onRename: (String) -> Void
+//
+//        var body: some View {
+//            VStack {
+//                Text("Rename File")
+//                    .font(.title)
+//                    .fontWeight(.bold)
+//
+//                TextField("New File Name", text: $newFileName) { isEditing in
+//                    if !isEditing {
+//                        onRename(newFileName)
+//                    }
+//                }
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+//                .padding()
+//
+//                Spacer()
+//            }
+//            .padding()
+//        }
+//    }
 

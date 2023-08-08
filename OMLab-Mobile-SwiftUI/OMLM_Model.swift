@@ -15,7 +15,9 @@ struct FileFolder: Hashable, Identifiable {
     var size: Int64
     var videoURL: URL?
     var thumbnail: UIImage?
+    // Metadata in JSON?
 }
+
 
 struct CSVFile: Hashable, Identifiable {
     var id = UUID()
@@ -23,7 +25,4 @@ struct CSVFile: Hashable, Identifiable {
     var timestamp: Date
     var data: String
     
-    // RAW Data in CSV
-    // Video in mp4
-    // Metadata in JSON
 }

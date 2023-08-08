@@ -91,7 +91,7 @@ class HomeView_ViewModel: ObservableObject {
         var fileFolders = [FileFolder]()
         
         // check if file has been saved to reduce loading when navigating back to home view
-        if fileHasBeenSaved() {
+        if fileHasBeenSavedOrDeleted() || fileHasBeenChanged() {
             do {
                 let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
                 
@@ -199,12 +199,29 @@ class HomeView_ViewModel: ObservableObject {
         }
     }
     
-    func fileHasBeenSaved() -> Bool {
+    func fileHasBeenSavedOrDeleted() -> Bool {
         do {
             let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             let currentDocumentsDirectoryLength = fileFolderURLs.count
             
-            if currentDocumentsDirectoryLength > files.count {
+            if currentDocumentsDirectoryLength != files.count {
+                return true
+            } else {
+                return false
+            }
+        } catch {
+            print("Error accessing folder: \(error.localizedDescription)")
+        }
+        return false
+    }
+    
+    func fileHasBeenChanged() -> Bool {
+        do {
+            let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let currentFileNames = fileFolderURLs.map { $0.lastPathComponent }
+            let existingFileNames = files.map { $0.name }
+
+            if currentFileNames != existingFileNames {
                 return true
             } else {
                 return false
