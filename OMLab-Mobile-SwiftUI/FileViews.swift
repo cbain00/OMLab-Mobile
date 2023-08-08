@@ -75,7 +75,7 @@ struct FileRowView<Destination>: View where Destination: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(file.name)
+                    Text(file.displayName)
                         .font(.headline)
                     Text(formatDate(file.timestamp))
                         .font(.caption)
@@ -148,7 +148,7 @@ struct FileRowView_SearchMenu<Destination>: View where Destination: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(file.name)
+                    Text(file.displayName)
                         .font(.headline)
                     Text(formatDate(file.timestamp))
                         .font(.caption)
@@ -206,7 +206,7 @@ struct FileDetailView: View {
     
     var body: some View {
         var fileName = file.name
-        var fileNameHeader = Text(fileName)
+        var fileNameHeader = Text(file.displayName)
         
         VStack {
             HStack {
@@ -517,12 +517,12 @@ struct FileDetailView: View {
         
         do {
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            let csvFilesURLs = filesURL.filter { $0.pathExtension == "txt" }
+            let txtFilesURLs = filesURL.filter { $0.pathExtension == "txt" && !$0.lastPathComponent.hasSuffix("_events.txt") }
             
-            guard let csvFileURL = csvFilesURLs.first else {
-                print("No CSV file found in the specified folder.")
+            guard let txtFileURL = txtFilesURLs.first else {
+                print("No txt file found in the specified folder.")
                 
-                let alertController = UIAlertController(title: "File Not Found", message: "Unable to find CSV file for export.", preferredStyle: .alert)
+                let alertController = UIAlertController(title: "File Not Found", message: "Unable to find txt file for export.", preferredStyle: .alert)
                 let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
                 alertController.addAction(okAction)
                 
@@ -533,7 +533,7 @@ struct FileDetailView: View {
                 return
             }
             
-            let activityViewController = UIActivityViewController(activityItems: [csvFileURL], applicationActivities: nil)
+            let activityViewController = UIActivityViewController(activityItems: [txtFileURL], applicationActivities: nil)
             if let windowScene = scene as? UIWindowScene {
                      windowScene.keyWindow?.rootViewController?.present(activityViewController, animated: true, completion: nil)
             }

@@ -25,12 +25,11 @@ class EyeTrackingViewController: UIViewController, ARSessionDelegate, UITextFiel
     var allowUDPConnections = true
     var allowScreenRecording = true
     
-    // recorded initializing
+    // recorder initializing
     let recorder = RPScreenRecorder.shared()
     var recordBool = false
     var outputURL: URL!
-    
-    let defaultName = "file"
+    var defaultName: String!
     
     var udpTriggered = false {
         didSet {

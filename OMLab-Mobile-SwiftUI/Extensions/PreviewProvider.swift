@@ -22,6 +22,7 @@ class DeveloperPreview {
     
     let file = FileFolder(
         name: "file_2023-08-03_135656",
+        displayName: "file",
         timestamp: Date(timeIntervalSince1970: 150),
         size: 100
     )

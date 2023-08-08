@@ -44,16 +44,23 @@ struct EyeTrackingView: UIViewControllerRepresentable {
         return Coordinator(isRecording: $isRecording)
     }
     
-    func updateUIViewController(_ uiViewController: EyeTrackingViewController, context: Context) {
+    func updateUIViewController(_ eyetrackingvc: EyeTrackingViewController, context: Context) {
         // update settings in view controller if needed
-        uiViewController.allowScreenRecording = settings.allowScreenRecording
-        uiViewController.allowUDPConnections = settings.allowUDPConnections
+        eyetrackingvc.allowScreenRecording = settings.allowScreenRecording
+        eyetrackingvc.allowUDPConnections = settings.allowUDPConnections
         
+        // both participant id and session name need to be populated to make new default name, else reverts to file
+        if !settings.participantID.isEmpty && !settings.sessionName.isEmpty {
+            eyetrackingvc.defaultName = [settings.participantID, settings.sessionName].joined(separator: "_")
+        } else {
+            eyetrackingvc.defaultName = "file"
+        }
+
         // Update EyeTrackingViewController based on changes in isRecording
         if isRecording {
-            uiViewController.startRecording()
+            eyetrackingvc.startRecording()
         } else {
-            uiViewController.stopRecording()
+            eyetrackingvc.stopRecording()
         }
     }
     
@@ -62,6 +69,13 @@ struct EyeTrackingView: UIViewControllerRepresentable {
         eyetrackingvc.delegate = context.coordinator
         eyetrackingvc.allowScreenRecording = settings.allowScreenRecording
         eyetrackingvc.allowUDPConnections = settings.allowUDPConnections
+        
+        // both participant id and session name need to be populated to make new default name, else reverts to file
+        if !settings.participantID.isEmpty && !settings.sessionName.isEmpty {
+            eyetrackingvc.defaultName = [settings.participantID, settings.sessionName].joined(separator: "_")
+        } else {
+            eyetrackingvc.defaultName = "file"
+        }
         return eyetrackingvc
     }
     

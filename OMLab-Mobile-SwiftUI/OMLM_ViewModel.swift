@@ -81,7 +81,7 @@ class HomeView_ViewModel: ObservableObject {
         }
     }
     
-    // MARK: FileList getters, setters, deleters
+    // MARK: FileList getters, setters & deleters
     
     func setFileList() {
         self.files = makeFileList()
@@ -90,8 +90,8 @@ class HomeView_ViewModel: ObservableObject {
     func makeFileList() -> [FileFolder] {
         var fileFolders = [FileFolder]()
         
-        // check if file has been saved to reduce loading when navigating back to home view
-        if fileHasBeenSavedOrDeleted() || fileHasBeenChanged() {
+        // check if any file has changed in order to refresh app list or not
+        if fileHasBeenModified() {
             do {
                 let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
                 
@@ -101,11 +101,18 @@ class HomeView_ViewModel: ObservableObject {
                     let timestamp = getFileFolderCreationDate(fileFolderURL: fileFolderURL)
                     let emptyDate = Date(timeIntervalSince1970: 0)
                     let name = fileFolderURL.lastPathComponent
+                    let displayName = formatFileName(fileName: name)
                     let size = getFileFolderSize(fileFolderURL: fileFolderURL)
                     let videoURL = getVideoURL(fileFolderURL: fileFolderURL)
-                    let thumbnail = self.getVideoThumbnail(videoURL: videoURL)
+                    let thumbnail = getVideoThumbnail(videoURL: videoURL)
                                                     
-                    let fileFolder = FileFolder(name: name, timestamp: timestamp ?? emptyDate, size: size, videoURL: videoURL, thumbnail: thumbnail)
+                    let fileFolder = FileFolder(name: name,
+                                                displayName: displayName,
+                                                timestamp: timestamp ?? emptyDate,
+                                                size: size,
+                                                videoURL: videoURL,
+                                                thumbnail: thumbnail)
+                    
                     fileFolders.append(fileFolder)
                 }
             } catch {
@@ -136,6 +143,17 @@ class HomeView_ViewModel: ObservableObject {
         }
         
         return nil
+    }
+    
+    func formatFileName(fileName: String) -> String {
+        let components = fileName.components(separatedBy: "_")
+        
+        if components.count > 2 {
+            let formattedName = components.dropLast().dropLast().joined(separator: "_")
+            return formattedName
+        } else {
+            return fileName
+        }
     }
 
     // returns size of contents of folder in KB
@@ -199,37 +217,18 @@ class HomeView_ViewModel: ObservableObject {
         }
     }
     
-    func fileHasBeenSavedOrDeleted() -> Bool {
+    func fileHasBeenModified() -> Bool {
         do {
             let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            let currentDocumentsDirectoryLength = fileFolderURLs.count
             
-            if currentDocumentsDirectoryLength != files.count {
-                return true
-            } else {
-                return false
-            }
+            let existingFileNames = Set(files.map { $0.name })
+            let currentFileNames = Set(fileFolderURLs.map { $0.lastPathComponent })
+            
+            return existingFileNames != currentFileNames
         } catch {
             print("Error accessing folder: \(error.localizedDescription)")
+            return false
         }
-        return false
-    }
-    
-    func fileHasBeenChanged() -> Bool {
-        do {
-            let fileFolderURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            let currentFileNames = fileFolderURLs.map { $0.lastPathComponent }
-            let existingFileNames = files.map { $0.name }
-
-            if currentFileNames != existingFileNames {
-                return true
-            } else {
-                return false
-            }
-        } catch {
-            print("Error accessing folder: \(error.localizedDescription)")
-        }
-        return false
     }
 
     func deleteFolder(_ file: String) {
