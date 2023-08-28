@@ -13,6 +13,8 @@ import UIKit
 import Charts
 import AVKit
 import AVFoundation
+import DomainGesture
+import ZipArchive
 
 struct FileListView: View {
     @ObservedObject var viewModel: HomeView_ViewModel
@@ -40,6 +42,12 @@ struct FileRowView<Destination>: View where Destination: View {
 
     @State private var transitionState: TransitionState = .inactive
     @State private var highlightColor: Color = .clear
+    
+    // Value to mimic 50 ms wait
+    let loadingSymbolWaitTime: Int = 50
+    let rowViewVStackSpacing: CGFloat = 2
+    let thumbnailWidth: CGFloat = 30
+    let thumbnailHeight: CGFloat = 50
 
     var body: some View {
         let isActive = Binding<Bool>(
@@ -56,8 +64,8 @@ struct FileRowView<Destination>: View where Destination: View {
             transitionState = .loading
             highlightColor = Color(UIColor.tertiarySystemBackground)
 
-            // Mimic 50 ms wait
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(50)) {
+            // loading symbol appears for a minimum of specified time (simulation of loading based on passed value)
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(loadingSymbolWaitTime)) {
                 transitionState = .active
                 highlightColor = .clear
             }
@@ -67,14 +75,14 @@ struct FileRowView<Destination>: View where Destination: View {
                     Image(uiImage: thumbnail)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 30, height: 50)
+                        .frame(width: thumbnailWidth, height: thumbnailHeight)
                 } else {
                     // Placeholder image if no thumbnail is available
                     Color.gray
-                        .frame(width: 30, height: 50)
+                        .frame(width: thumbnailWidth, height: thumbnailHeight)
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: rowViewVStackSpacing) {
                     Text(file.displayName)
                         .font(.headline)
                     Text(formatDate(file.timestamp))
@@ -124,6 +132,9 @@ struct FileRowView_SearchMenu<Destination>: View where Destination: View {
 
     @State private var transitionState: TransitionState = .inactive
     @State private var highlightColor: Color = .clear
+    
+    let loadingSymbolWaitTime: Int = 50
+    let rowViewVStackSpacing: CGFloat = 2
 
     var body: some View {
         let isActive = Binding<Bool>(
@@ -141,13 +152,13 @@ struct FileRowView_SearchMenu<Destination>: View where Destination: View {
             highlightColor = Color(UIColor.tertiarySystemBackground)
 
             // Mimic 50 ms wait
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(50)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(loadingSymbolWaitTime)) {
                 transitionState = .active
                 highlightColor = .clear
             }
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: rowViewVStackSpacing) {
                     Text(file.displayName)
                         .font(.headline)
                     Text(formatDate(file.timestamp))
@@ -215,85 +226,7 @@ struct FileDetailView: View {
                     .font(.title3)
                     .fontWeight(.bold)
                     .toolbar {
-                        ToolbarItem(placement: .primaryAction) {
-                            Menu {
-                                Section {
-                                    Button(action: {
-                                        // play video recording
-                                        isShowingVideoPlayer = true
-                                    }) {
-                                        Label("Play Session Recording", systemImage: "play.circle.fill")
-                                    }
-                                    .disabled(!checkForMP4(file: fileName).exists)
-                                    
-                                    Button(action: {
-                                        // show file info sheet
-                                        isShowingLog = true
-                                    }) {
-                                        Label("View Session Log", systemImage: "list.bullet.rectangle.portrait.fill")
-                                    }
-                                    .disabled(!checkForEventFile(file: fileName).exists)
-                                }
-                                
-                                Section {
-                                    Menu("Export") {
-                                        Button(action: {}) {
-                                            Label("Export Zip", systemImage: "archivebox")
-                                        }
-                                        // to be implemented
-                                        .disabled(true)
-                                        
-                                        Button(action: {
-                                            // allow user to share txt file data
-                                            shareTrackingData(fileName: fileName)
-                                        }) {
-                                            Label("Export Tracking Data", systemImage: "doc.text")
-                                        }
-                                        
-                                        Button(action: {
-                                            shareVideo(fileName: fileName)
-                                        }) {
-                                            Label("Export Video", systemImage: "play.rectangle")
-                                        }
-                                        .disabled(!checkForMP4(file: fileName).exists)
-                                        
-                                        Button(action: {
-                                            shareLog(fileName: fileName)
-                                        }) {
-                                            Label("Export Session Log", systemImage: "doc.text")
-                                        }
-                                        .disabled(!checkForEventFile(file: fileName).exists)
-                                    }
-                                    
-                                    Button(action: {
-                                        // Show rename view
-                                        Rename(file: file)
-                                    }) {
-                                        Label("Rename", systemImage: "pencil")
-                                    }
-                                    
-                                    Button(action: {
-                                        // show file info sheet
-                                        isShowingFileInfoView = true
-                                    }) {
-                                        Label("Folder Info", systemImage: "info.circle")
-                                    }
-                                }
-
-                                Section {
-                                    Button(role: .destructive, action: {
-                                        // allow user to attempt to delete file
-                                        Delete(file: file)
-                                    }) {
-                                        Label("Delete", systemImage: "trash.fill")
-                                    }
-                                }
-                                
-                            } label: {
-                                Image(systemName: "ellipsis.circle")
-                                    .frame(width: 25, height: 15, alignment: .trailing)
-                            }
-                        }
+                        toolbarItem(fileName: fileName)
                     }
                 Spacer()
             }
@@ -302,7 +235,7 @@ struct FileDetailView: View {
                 Spacer()
             
                 ScrollView {
-                    VStack(spacing: 20) {
+                    VStack(spacing: DrawingConstants.graphViewVStackSpacing) {
                         GraphView(fileName: fileName, group: .eyes)
                         GraphView(fileName: fileName, group: .head)
                     }
@@ -328,11 +261,12 @@ struct FileDetailView: View {
     
     struct FileInfoView: View {
         var file: FileFolder
+        let infoViewVStackSpacing: CGFloat = 10
         let imageSize: CGFloat = 30
         let rowSpaceLength: CGFloat = 20
         
         var body: some View {
-            VStack(spacing: 10) {
+            VStack(spacing: infoViewVStackSpacing) {
                 HStack {
                     Image(systemName: "info.circle")
                         .font(.system(size: imageSize))
@@ -509,6 +443,34 @@ struct FileDetailView: View {
             }
         }
     }
+    
+    func shareZip(fileName: String) {
+        let allScenes = UIApplication.shared.connectedScenes
+        let scene = allScenes.first { $0.activationState == .foregroundActive }
+        let fileFolderURL = documentsURL.appendingPathComponent(fileName)
+        
+        // Check if the directory exists
+        guard fileManager.fileExists(atPath: fileFolderURL.path) else {
+            print("Directory does not exist.")
+            return
+        }
+        
+        // Define the output zip file URL
+        let outputZipURL = documentsURL.appendingPathComponent(fileName + ".zip")
+        
+        // Create a zip archive
+        let success = SSZipArchive.createZipFile(atPath: outputZipURL.path, withContentsOfDirectory: fileFolderURL.path)
+        
+        if success {
+            // Share the zip file
+            let activityViewController = UIActivityViewController(activityItems: [outputZipURL], applicationActivities: nil)
+            if let windowScene = scene as? UIWindowScene {
+                windowScene.keyWindow?.rootViewController?.present(activityViewController, animated: true, completion: nil)
+            }
+        } else {
+            print("Failed to create the zip archive.")
+        }
+    }
 
     func shareTrackingData(fileName: String) {
         let allScenes = UIApplication.shared.connectedScenes
@@ -666,14 +628,103 @@ struct FileDetailView: View {
             return (false, nil)
         }
     }
-}
+    
+    func toolbarItem(fileName: String) -> some ToolbarContent {
+        ToolbarItem(placement: .primaryAction) {
+            Menu {
+                Section {
+                    Button(action: {
+                        // play video recording
+                        isShowingVideoPlayer = true
+                    }) {
+                        Label("Play Session Recording", systemImage: "play.circle.fill")
+                    }
+                    .disabled(!checkForMP4(file: fileName).exists)
+                    
+                    Button(action: {
+                        // show file info sheet
+                        isShowingLog = true
+                    }) {
+                        Label("View Session Log", systemImage: "list.bullet.rectangle.portrait.fill")
+                    }
+                    .disabled(!checkForEventFile(file: fileName).exists)
+                }
+                
+                Section {
+                    Menu("Export") {
+                        Button(action: {
+                            // allow user to export zip file of directory
+                            shareZip(fileName: fileName)
+                        }) {
+                            Label("Zip", systemImage: "archivebox")
+                        }
+                        
+                        Button(action: {
+                            // allow user to share txt file data
+                            shareTrackingData(fileName: fileName)
+                        }) {
+                            Label("Tracking Data", systemImage: "doc.text")
+                        }
+                        
+                        Button(action: {
+                            // allow user to share video recording (if applicable)
+                            shareVideo(fileName: fileName)
+                        }) {
+                            Label("Video", systemImage: "play.rectangle")
+                        }
+                        .disabled(!checkForMP4(file: fileName).exists)
+                        
+                        Button(action: {
+                            // allow user to share txt file data (if applicable)
+                            shareLog(fileName: fileName)
+                        }) {
+                            Label("Session Log", systemImage: "doc.text")
+                        }
+                        .disabled(!checkForEventFile(file: fileName).exists)
+                    }
+                    
+                    Button(action: {
+                        // Show rename view
+                        Rename(file: file)
+                    }) {
+                        Label("Rename", systemImage: "pencil")
+                    }
+                    
+                    Button(action: {
+                        // show file info sheet
+                        isShowingFileInfoView = true
+                    }) {
+                        Label("Folder Info", systemImage: "info.circle")
+                    }
+                }
 
+                Section {
+                    Button(role: .destructive, action: {
+                        // allow user to attempt to delete file
+                        Delete(file: file)
+                    }) {
+                        Label("Delete", systemImage: "trash.fill")
+                    }
+                }
+                
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .frame(width: DrawingConstants.imageWidth, height: DrawingConstants.imageHeight, alignment: .trailing)
+            }
+        }
+    }
+}
 
 struct GraphView: View {
     enum Group {
         case eyes
         case head
     }
+
+    // placeholder until modified
+    @State private var domain1: ClosedRange<Double> = 0.0...1.0
+    @State private var domain2: ClosedRange<Double> = 0.0...1.0
+    @State private var domain3: ClosedRange<Double> = 0.0...1.0
 
     var fileName: String
     let group: Group
@@ -700,26 +751,37 @@ struct GraphView: View {
                 let yMin_Y = rightEyeYData.map { $0.y }.min() ?? 0
                 let yMax_Y = rightEyeYData.map { $0.y }.max() ?? 0
                 
-                VStack(spacing: 20) {
+                VStack(spacing: DrawingConstants.graphViewVStackSpacing) {
+                    // hacky way to define graph scrolling method
+                    Rectangle()
+                        .hidden()
+                        .frame(width: DrawingConstants.placeholderRectangleFrame, height: DrawingConstants.placeholderRectangleFrame)
+                        .onAppear {
+                            domain1 = xMin_X...xMax_X
+                            domain2 = xMin_Y...xMax_Y
+                        }
+                    
                     VStack {
                         // x data
                         Text("Eye Horizontal (deg)")
                             .fontWeight(.bold)
-                        
-                        Chart {
-                            ForEach(rightEyeXData, id: \.id) { item in
-                                LineMark(
-                                    x: .value("Time", item.x),
-                                    y: .value("RightEyeX", item.y),
-                                    series: .value("Time", "RightEyeX")
-                                )
-                                .foregroundStyle(.red)
+                        DomainGesture($domain1) {
+                            Chart {
+                                ForEach(rightEyeXData, id: \.id) { item in
+                                    LineMark(
+                                        x: .value("Time", item.x),
+                                        y: .value("RightEyeX", item.y),
+                                        series: .value("Time", "RightEyeX")
+                                    )
+                                    .foregroundStyle(.red)
+                                }
                             }
-                        }
-                        .chartXScale(domain: [xMin_X, xMax_X])
-                        .chartYScale(domain: [yMin_X, yMax_X])
-                        .chartYAxis {
-                            AxisMarks(position: .leading)
+                            .frame(height: DrawingConstants.eyeGraphsFrameSize)
+                            .chartXScale(domain: domain1)
+                            .chartYScale(domain: [yMin_X, yMax_X])
+                            .chartYAxis {
+                                AxisMarks(position: .leading)
+                            }
                         }
                     }
                     
@@ -728,20 +790,23 @@ struct GraphView: View {
                         Text("Eye Vertical (deg)")
                             .fontWeight(.bold)
                         
-                        Chart {
-                            ForEach(rightEyeYData, id: \.id) { item in
-                                LineMark(
-                                    x: .value("Time", item.x),
-                                    y: .value("RightEyeY", item.y),
-                                    series: .value("Time", "RightEyeY")
-                                )
-                                .foregroundStyle(.blue)
+                        DomainGesture($domain2) {
+                            Chart {
+                                ForEach(rightEyeYData, id: \.id) { item in
+                                    LineMark(
+                                        x: .value("Time", item.x),
+                                        y: .value("RightEyeY", item.y),
+                                        series: .value("Time", "RightEyeY")
+                                    )
+                                    .foregroundStyle(.blue)
+                                }
                             }
-                        }
-                        .chartXScale(domain: [xMin_Y, xMax_Y])
-                        .chartYScale(domain: [yMin_Y, yMax_Y])
-                        .chartYAxis {
-                            AxisMarks(position: .leading)
+                            .frame(height: DrawingConstants.eyeGraphsFrameSize)
+                            .chartXScale(domain: domain2)
+                            .chartYScale(domain: [yMin_Y, yMax_Y])
+                            .chartYAxis {
+                                AxisMarks(position: .leading)
+                            }
                         }
                     }
                 }
@@ -749,11 +814,12 @@ struct GraphView: View {
 
         case .head:
             let csv = getCSVData(fileName: fileName)
-            let headData = [
+            let colorLegend = [
                 (color: Color.red, name: "Yaw"),
                 (color: Color.blue, name: "Pitch"),
                 (color: Color.green, name: "Roll")
             ]
+            
             if csv.isEmpty {
                 Text("No Graph Available")
                     .font(.title3)
@@ -789,56 +855,66 @@ struct GraphView: View {
                 )
                 
                 VStack {
+                    Rectangle()
+                        .hidden()
+                        .frame(width: DrawingConstants.placeholderRectangleFrame, height: DrawingConstants.placeholderRectangleFrame)
+                        .onAppear {
+                            domain3 = xMin...xMax
+                        }
+
                     Text("Head (deg)")
                         .fontWeight(.bold)
                     
-                    Chart {
-                        ForEach(headXData, id: \.id) { item in
-                            LineMark(
-                                x: .value("Time", item.x),
-                                y: .value("HeadX", item.y),
-                                series: .value("Time", "Yaw")
-                            )
-                            .foregroundStyle(.red)
+                    DomainGesture($domain3) {
+                        Chart {
+                            ForEach(headXData, id: \.id) { item in
+                                LineMark(
+                                    x: .value("Time", item.x),
+                                    y: .value("HeadX", item.y),
+                                    series: .value("Time", "Yaw")
+                                )
+                                .foregroundStyle(.red)
+                            }
+                            
+                            ForEach(headYData, id: \.id) { item in
+                                LineMark(
+                                    x: .value("Time", item.x),
+                                    y: .value("HeadY", item.y),
+                                    series: .value("Time", "Pitch")
+                                )
+                                .foregroundStyle(.blue)
+                            }
+                            
+                            ForEach(headZData, id: \.id) { item in
+                                LineMark(
+                                    x: .value("Time", item.x),
+                                    y: .value("HeadZ", item.y),
+                                    series: .value("Time", "Roll")
+                                )
+                                .foregroundStyle(.green)
+                            }
                         }
-                        
-                        ForEach(headYData, id: \.id) { item in
-                            LineMark(
-                                x: .value("Time", item.x),
-                                y: .value("HeadY", item.y),
-                                series: .value("Time", "Pitch")
-                            )
-                            .foregroundStyle(.blue)
-                        }
-                        
-                        ForEach(headZData, id: \.id) { item in
-                            LineMark(
-                                x: .value("Time", item.x),
-                                y: .value("HeadZ", item.y),
-                                series: .value("Time", "Roll")
-                            )
-                            .foregroundStyle(.green)
-                        }
-                    }
-                    .chartForegroundStyleScale(["Yaw": .red, "Pitch": .blue, "Roll": .green])
-                    .chartLegend(position: .top, alignment: .center) {
-                        HStack {
-                            ForEach(headData, id: \.name) { data in
-                                HStack {
-                                    BasicChartSymbolShape.circle
-                                        .foregroundColor(data.color)
-                                        .frame(width: 8, height: 8)
-                                    Text(data.name)
-                                        .foregroundColor(.gray)
-                                        .font(.caption)
+                        .chartForegroundStyleScale(["Yaw": .red, "Pitch": .blue, "Roll": .green])
+                        .chartLegend(position: .top, alignment: .center) {
+                            HStack {
+                                ForEach(colorLegend, id: \.name) { data in
+                                    HStack {
+                                        BasicChartSymbolShape.circle
+                                            .foregroundColor(data.color)
+                                            .frame(width: 8, height: 8)
+                                        Text(data.name)
+                                            .foregroundColor(.gray)
+                                            .font(.caption)
+                                    }
                                 }
                             }
                         }
-                    }
-                    .chartXScale(domain: [xMin, xMax])
-                    .chartYScale(domain: [yMin, yMax])
-                    .chartYAxis {
-                        AxisMarks(position: .leading)
+                        .frame(height: DrawingConstants.headGraphsFrameSize)
+                        .chartXScale(domain: domain3)
+                        .chartYScale(domain: [yMin, yMax])
+                        .chartYAxis {
+                            AxisMarks(position: .leading)
+                        }
                     }
                 }
             }
@@ -851,7 +927,6 @@ struct GraphView: View {
         var y: Double
     }
     
-    // .contentsOfDirectory acts as a "double-click" on a folder
     func getCSVData(fileName: String) -> [String: [String]] {
         let fileManager = FileManager.default
         guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
@@ -861,6 +936,7 @@ struct GraphView: View {
         
         let fileFolderURL = documentsURL.appendingPathComponent(fileName)
         do {
+            // .contentsOfDirectory acts as a "double-click" on a folder
             let filesURL = try fileManager.contentsOfDirectory(at: fileFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             let csvFilesURLs = filesURL.filter { $0.pathExtension == "txt" }
             
@@ -880,6 +956,12 @@ struct GraphView: View {
             let headerLine = lines[0]
             let columnNames = headerLine.components(separatedBy: ", ")
             
+            guard let firstTimestampIndex = lines.dropFirst().first?.components(separatedBy: ", ").first,
+                  let firstTimeValue = Double(firstTimestampIndex) else {
+                print("Could not extract the first timestamp value.")
+                return [:]
+            }
+            
             var parsedCSV: [String: [String]] = [:]
             for columnName in columnNames {
                 parsedCSV[columnName] = []
@@ -888,10 +970,15 @@ struct GraphView: View {
             for line in lines.dropFirst() {
                 let values = line.components(separatedBy: ", ")
                 
-                for (index, columnName) in columnNames.enumerated() {
-                    if index < values.count && !values[index].isEmpty {
-                        parsedCSV[columnName]?.append(values[index])
+                // take in a max of first 60 seconds of data
+                if let xValue = Double(values.first ?? "0"), xValue - firstTimeValue <= 60.0 {
+                    for (index, columnName) in columnNames.enumerated() {
+                        if index < values.count && !values[index].isEmpty {
+                            parsedCSV[columnName]?.append(values[index])
+                        }
                     }
+                } else {
+                    break
                 }
             }
             
@@ -901,7 +988,7 @@ struct GraphView: View {
             return [:]
         }
     }
-    
+
     func makeDataArray(csv: [String: [String]], yvalue: String) -> [GraphData] {
         guard let xValues = csv["Time"], let yValues = csv[yvalue] else {
             return []
@@ -909,17 +996,30 @@ struct GraphView: View {
         
         let count = min(xValues.count, yValues.count)
         
-        let dataArray = Array(zip(xValues.prefix(count), yValues.prefix(count)))
-            .compactMap { x, y in
-                if let x = Double(x), let y = Double(y) {
-                    return GraphData(x: x, y: y)
+        var dataArray: [GraphData] = []
+        if let firstTimestamp = Double(xValues.first ?? "0") {
+            dataArray = (0..<count).compactMap { i in
+                guard let x = Double(xValues[i]), let y = Double(yValues[i]) else {
+                    return nil
                 }
-                return nil
+                let xInSeconds = x - firstTimestamp
+                return GraphData(x: xInSeconds, y: y)
             }
+        }
         
         return dataArray
     }
 }
+
+private struct DrawingConstants {
+    static let imageWidth: CGFloat = 25
+    static let imageHeight: CGFloat = 15
+    static let graphViewVStackSpacing: CGFloat = 20
+    static let placeholderRectangleFrame: CGFloat = 0.0001
+    static let eyeGraphsFrameSize: CGFloat = 150
+    static let headGraphsFrameSize: CGFloat = 250
+}
+
 
 /// DO NOT DELETE!!!
 // file list w/o loading symbol when clicked

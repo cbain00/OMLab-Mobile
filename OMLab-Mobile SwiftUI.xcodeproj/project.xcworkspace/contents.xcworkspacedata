@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:/Users/cbain/Developer/OMLab-Mobile SwiftUI/OMLab-Mobile SwiftUI.xcodeproj">
+      location = "self:">
    </FileRef>
 </Workspace>

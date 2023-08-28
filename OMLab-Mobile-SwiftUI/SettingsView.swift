@@ -156,9 +156,10 @@ struct SettingsView: View {
         for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
             let interface = ifptr.pointee
 
-            // Check for IPv4 or IPv6 interface:
+            // Check for IPv4 or IPv6 interface (IPv6 address is not helpful for UDP connecting, removed):
             let addrFamily = interface.ifa_addr.pointee.sa_family
-            if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
+            if addrFamily == UInt8(AF_INET) {
+            //if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
 
                 // Check interface name:
                 // wifi = ["en0"]

@@ -49,7 +49,7 @@ struct EyeTrackingView: UIViewControllerRepresentable {
         eyetrackingvc.allowScreenRecording = settings.allowScreenRecording
         eyetrackingvc.allowUDPConnections = settings.allowUDPConnections
         
-        // both participant id and session name need to be populated to make new default name, else reverts to file
+        // both participant id AND session name need to be populated to make new default name, else reverts to file
         if !settings.participantID.isEmpty && !settings.sessionName.isEmpty {
             eyetrackingvc.defaultName = [settings.participantID, settings.sessionName].joined(separator: "_")
         } else {

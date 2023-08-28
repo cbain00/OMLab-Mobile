@@ -26,6 +26,8 @@
 		F63B703D29F06BB500CF3BB2 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63B703C29F06BB500CF3BB2 /* Utilities.swift */; };
 		F6888A0629FC2A5D00E97F7D /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = F6888A0529FC2A5D00E97F7D /* Models.scnassets */; };
 		F69DC83F2A7C393800F2DC7E /* PreviewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69DC83E2A7C393800F2DC7E /* PreviewProvider.swift */; };
+		F69DC8422A8C21DB00F2DC7E /* DomainGesture in Frameworks */ = {isa = PBXBuildFile; productRef = F69DC8412A8C21DB00F2DC7E /* DomainGesture */; };
+		F69DC8452A93CB8E00F2DC7E /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = F69DC8442A93CB8E00F2DC7E /* ZipArchive */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +60,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F69DC8422A8C21DB00F2DC7E /* DomainGesture in Frameworks */,
+				F69DC8452A93CB8E00F2DC7E /* ZipArchive in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +168,10 @@
 			dependencies = (
 			);
 			name = "OMLab-Mobile-SwiftUI";
+			packageProductDependencies = (
+				F69DC8412A8C21DB00F2DC7E /* DomainGesture */,
+				F69DC8442A93CB8E00F2DC7E /* ZipArchive */,
+			);
 			productName = "OMLab-Mobile SwiftUI";
 			productReference = F63B700329E8A54700CF3BB2 /* OMLab-Mobile-SwiftUI.app */;
 			productType = "com.apple.product-type.application";
@@ -192,6 +200,10 @@
 				Base,
 			);
 			mainGroup = F63B6FFA29E8A54700CF3BB2;
+			packageReferences = (
+				F69DC8402A8C21DB00F2DC7E /* XCRemoteSwiftPackageReference "domain-gesture" */,
+				F69DC8432A93CB8E00F2DC7E /* XCRemoteSwiftPackageReference "ZipArchive" */,
+			);
 			productRefGroup = F63B700429E8A54700CF3BB2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -441,6 +453,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F69DC8402A8C21DB00F2DC7E /* XCRemoteSwiftPackageReference "domain-gesture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/levitatingpineapple/domain-gesture.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		F69DC8432A93CB8E00F2DC7E /* XCRemoteSwiftPackageReference "ZipArchive" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ZipArchive/ZipArchive.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F69DC8412A8C21DB00F2DC7E /* DomainGesture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F69DC8402A8C21DB00F2DC7E /* XCRemoteSwiftPackageReference "domain-gesture" */;
+			productName = DomainGesture;
+		};
+		F69DC8442A93CB8E00F2DC7E /* ZipArchive */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F69DC8432A93CB8E00F2DC7E /* XCRemoteSwiftPackageReference "ZipArchive" */;
+			productName = ZipArchive;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F63B6FFB29E8A54700CF3BB2 /* Project object */;
 }
